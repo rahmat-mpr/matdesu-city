@@ -3,6 +3,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MapControls } from 'three/addons/controls/MapControls.js';
 import { islands, KIT_SCALE } from '../data/islands.js';
 import { createAmbient } from './ambient.js';
+import { shapeOf, bridgeSpan } from './shapes.js';
+import { buildIslandGeometry } from './islandMesh.js';
+import { createSea } from './sea.js';
 import { createQuest, createPlayOverlay, createCardUI } from './ui.js';
 
 // ---------- constants ----------
@@ -41,11 +44,13 @@ controls.dampingFactor = 0.08;
 controls.minDistance = 14;
 // portrait screens see less map horizontally, so pull the camera back
 const portraitFit = () => Math.max(1, 0.9 / camera.aspect);
+let sea = null; // created below, needs the fog range
 const applyFit = () => {
   const f = portraitFit();
   controls.maxDistance = 75 * f;
   scene.fog.near = 110 * f;
   scene.fog.far = 260 * f;
+  sea?.setFog(scene.fog.near, scene.fog.far);
 };
 applyFit();
 controls.zoomToCursor = true;
@@ -63,40 +68,14 @@ sun.position.set(-30, 50, 25);
 scene.add(sun);
 
 // ---------- sea ----------
-const seaMaterial = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime: { value: 0 },
-    uCam: { value: camera.position },
-    uDeep: { value: new THREE.Color('#2fc4d4') },
-    uShallow: { value: new THREE.Color('#58dbe0') },
-    uFog: { value: new THREE.Color(HORIZON) },
-  },
-  vertexShader: `
-    varying vec3 vW;
-    void main() {
-      vec4 w = modelMatrix * vec4(position, 1.0);
-      vW = w.xyz;
-      gl_Position = projectionMatrix * viewMatrix * w;
-    }`,
-  fragmentShader: `
-    varying vec3 vW;
-    uniform float uTime;
-    uniform vec3 uCam, uDeep, uShallow, uFog;
-    void main() {
-      vec2 p = vW.xz;
-      float w = sin(p.x * 0.35 + uTime * 0.6) + sin(p.y * 0.45 - uTime * 0.5) + sin((p.x + p.y) * 0.22 + uTime * 0.4);
-      float l = sin(p.x * 0.9 + sin(p.y * 0.7 + uTime) * 1.5 + uTime * 0.8) * sin(p.y * 0.8 + sin(p.x * 0.6 - uTime * 0.7) * 1.5);
-      vec3 c = mix(uDeep, uShallow, 0.5 + w * 0.12);
-      c += smoothstep(0.8, 1.0, l) * 0.12;
-      float f = smoothstep(90.0, 260.0, distance(vW, uCam));
-      gl_FragColor = vec4(mix(c, uFog, f), 1.0);
-      #include <colorspace_fragment>
-    }`,
+// stylized toon water (src/sea.js): shore-distance texture baked from the island shapes, foam, waves, caustics
+const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+islands.forEach((isl) => {
+  isl.bound = shapeOf(isl).bound; // outer extent incl. spits and islets (dolphins, leaves)
 });
-const sea = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), seaMaterial);
-sea.rotation.x = -Math.PI / 2;
-sea.position.y = SEA_Y;
-scene.add(sea);
+sea = createSea({ scene, camera, islands, seaY: SEA_Y, horizon: HORIZON, sunPosition: sun.position, reduceQuery });
+applyFit();
+window.app.sea = sea;
 
 // ---------- clouds ----------
 const clouds = new THREE.Group();
@@ -125,54 +104,16 @@ scene.add(clouds);
 const pickMeshes = [];
 const islandRoots = new Map(); // id -> THREE.Group (island-local coordinate space)
 
-function blob(a, seed) {
-  return 1 + 0.06 * Math.sin(2 * a + seed) + 0.04 * Math.sin(3 * a + seed * 2) + 0.03 * Math.sin(5 * a + seed * 3);
-}
-
-// Cylinder (unit radius) whose outline is warped into an irregular blob of the given radius.
-function blobCylinder(height, radius, seed, bottomScale = 1) {
-  const g = new THREE.CylinderGeometry(1, bottomScale, height, 48, 1);
-  const p = g.attributes.position;
-  for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i);
-    const z = p.getZ(i);
-    const f = blob(Math.atan2(z, x), seed) * radius;
-    p.setX(i, x * f);
-    p.setZ(i, z * f);
-  }
-  g.computeVertexNormals();
-  return g;
-}
-
 function buildIsland(isl) {
   const [px, pz] = isl.position;
-  const R = isl.radius;
   const root = new THREE.Group();
   root.position.set(px, 0, pz);
 
-  const parts = [
-    // grass top (surface at y = 0)
-    [blobCylinder(0.5, R, isl.seed), isl.theme.grass, -0.25],
-    // sand ring
-    [blobCylinder(0.57, R + 1.1, isl.seed), isl.theme.sand, -0.415],
-    // earth underside
-    [blobCylinder(2.6, R + 1.1, isl.seed, 0.35), '#8a5a3c', -2.0],
-  ];
-  for (const [geo, color, y] of parts) {
-    const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }));
-    mesh.position.y = y;
-    mesh.userData.islandId = isl.id;
-    root.add(mesh);
-    pickMeshes.push(mesh);
-  }
-  // shallow water halo around the island
-  const halo = new THREE.Mesh(
-    blobCylinder(0.02, R + 3.4, isl.seed),
-    new THREE.MeshBasicMaterial({ color: '#9af2f0', transparent: true, opacity: 0.5, depthWrite: false })
-  );
-  halo.position.y = SEA_Y + 0.05;
-  halo.name = 'halo'; // pulsed by ambient.js
-  root.add(halo);
+  // one vertex-coloured mesh per island: sand slab, earth underside, grass top, terraces, islets (src/islandMesh.js)
+  const mesh = new THREE.Mesh(buildIslandGeometry(isl, shapeOf(isl)), new THREE.MeshLambertMaterial({ vertexColors: true }));
+  mesh.userData.islandId = isl.id;
+  root.add(mesh);
+  pickMeshes.push(mesh);
 
   scene.add(root);
   islandRoots.set(isl.id, root);
@@ -184,14 +125,14 @@ function buildBridges() {
   const deckMat = new THREE.MeshLambertMaterial({ color: '#c28d55' });
   const railMat = new THREE.MeshLambertMaterial({ color: '#8f5f35' });
   for (const isl of islands.slice(1)) {
-    const [x, z] = isl.position;
-    const dist = Math.hypot(x, z);
-    const start = hub.radius - 0.3;
-    const end = dist - isl.radius + 0.3;
+    // from the hub's real edge to the island's real edge along the line between the centres
+    const { dx, dz, d0, d1 } = bridgeSpan(hub, isl);
+    const start = d0 - 0.3;
+    const end = d1 + 0.3;
     const len = end - start;
     const bridge = new THREE.Group();
-    bridge.position.set((x / dist) * (start + len / 2), 0.05, (z / dist) * (start + len / 2));
-    bridge.rotation.y = Math.atan2(x, z);
+    bridge.position.set(dx * (start + len / 2), 0.05, dz * (start + len / 2));
+    bridge.rotation.y = Math.atan2(dx, dz);
     const deck = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.14, len), deckMat);
     bridge.add(deck);
     for (const side of [-0.85, 0.85]) {
@@ -208,7 +149,8 @@ buildBridges();
 
 // ---------- models ----------
 const loader = new GLTFLoader();
-const ambient = createAmbient({ scene, camera, islands, islandRoots, loader, seaY: SEA_Y }); // wind, leaves, people, dolphins, birds
+const ambient = createAmbient({ scene, camera, islands, islandRoots, loader, seaY: SEA_Y }); // wind, leaves, people, dolphins, birds, race cars, flights
+window.app.ambient = ambient; // e.g. app.ambient.flights.trigger('rocket' | 'plane')
 const templates = new Map(); // 'kit/name' -> scaled, centred, grounded template
 const lambertCache = new Map();
 
@@ -256,12 +198,17 @@ function loadModel(key) {
 function placeModels() {
   for (const isl of islands) {
     const root = islandRoots.get(isl.id);
+    const shape = shapeOf(isl);
     for (const p of isl.models) {
       const tpl = templates.get(p.m);
       if (!tpl) continue;
+      if (shape.land(p.x, p.z) > 0.15) {
+        console.warn(`Placement off the island, skipped: ${isl.id} ${p.m} (${p.x}, ${p.z})`);
+        continue;
+      }
       const obj = tpl.clone();
       obj.scale.setScalar(KIT_SCALE[p.m.split('/')[0]] * (p.s ?? 1));
-      obj.position.set(p.x, p.y ?? 0, p.z);
+      obj.position.set(p.x, (p.y ?? 0) + shape.height(p.x, p.z), p.z); // sits on terraces, beaches and islets
       obj.rotation.y = THREE.MathUtils.degToRad(p.r ?? 0);
       root.add(obj);
       ambient.addProp(obj, p, isl);
@@ -467,11 +414,13 @@ flyTo(HOME_TARGET.clone(), viewDir.clone().multiplyScalar(HOME_DIST * portraitFi
 });
 
 const clock = new THREE.Clock();
+let ambientTime = 0;
 renderer.setAnimationLoop(() => {
   const dt = clock.getDelta();
-  seaMaterial.uniforms.uTime.value += dt;
+  ambientTime += dt;
+  sea.update(dt);
   clouds.rotation.y += dt * 0.008;
-  ambient.update(dt, seaMaterial.uniforms.uTime.value);
+  ambient.update(dt, ambientTime);
 
   stepFly(performance.now());
   controls.update();

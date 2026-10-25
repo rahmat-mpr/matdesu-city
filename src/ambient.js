@@ -1,10 +1,12 @@
 // Ambient life for MatDesu City: walking people, wind sway, falling leaves, jumping dolphins, birds,
-// race cars, pulsing shore foam. Everything is driven by one `update(dt, t)` call from the main loop.
-// Layout/route data lives in data/ambient.js.
+// race cars lapping the circuit, rocket / plane flights (src/flights.js). Everything is driven by one `update(dt, t)`
+// call from the main loop. Layout/route data lives in data/ambient.js. (Shore foam is part of the sea shader, src/sea.js.)
 import * as THREE from 'three';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { SKINS, walkers, loiterers, flocks, soarers, dolphinZone, carTrack } from '../data/ambient.js';
+import { SKINS, walkers, loiterers, flocks, soarers, dolphinZone, racing, flights as flightCfg } from '../data/ambient.js';
+import { shapeOf, bridgeSpan } from './shapes.js';
+import { createFlights } from './flights.js';
 
 // ---------- config (counts / speeds) ----------
 const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -23,8 +25,7 @@ const CONFIG = {
   dropletsPerSplash: 7,
   flapSpeed: 9, // wing beats rad/s for flocks
   birdScale: 1.3,
-  cars: { speed: 7, wait: [3, 9] }, // seconds to cross, seconds to rest between runs
-  foamPulse: 0.8,
+  carReduceSpeed: 0.45, // race car speed factor under reduced motion
 };
 
 const HALF_PI = Math.PI / 2;
@@ -48,9 +49,11 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
   const sway = []; // { obj, amp, freq, phase, flag, baseY }
   const treeSpots = []; // world positions of tree crowns (leaf spawn)
   const cars = [];
+  const flights = createFlights({ scene, camera, islands, islandRoots, cfg: flightCfg, reduceQuery });
 
   function addProp(obj, placement, isl) {
     const name = placement.m.split('/')[1] || '';
+    if (isl.id === flightCfg.island && /^(rocket_|craft_)/.test(name) && flights.addPart(obj, placement, isl)) return; // flown, never swayed
     let amp = 0;
     let freq = 1;
     let flag = false;
@@ -73,9 +76,7 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
       obj.rotation.order = 'ZXY'; // tilt about world axes after the placement yaw
       sway.push({ obj, amp, freq, flag, phase: hash(placement.x, placement.z) * 6.28 + isl.seed, baseY: obj.rotation.y });
     }
-    if (isl.id === carTrack.island && /^raceCar/.test(name)) {
-      cars.push({ obj, state: 'wait', timer: rnd(1, 5), from: 0, to: 0, k: 0, dur: 1, z: obj.position.z, baseYaw: obj.rotation.y });
-    }
+    if (isl.id === racing.island && /^raceCar/.test(name) && isl.circuit) addCar(obj, isl);
   }
 
   function updateSway(t) {
@@ -95,17 +96,6 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
         o.rotation.x = wind.z * a;
       }
     }
-  }
-
-  // ---------- shore foam: gentle pulse of the existing shallow-water halos ----------
-  const halos = islands.map((i) => islandRoots.get(i.id)?.getObjectByName('halo')).filter(Boolean);
-  function updateFoam(t) {
-    halos.forEach((h, i) => {
-      if (reduce) return;
-      const p = Math.sin(t * CONFIG.foamPulse + i * 1.3);
-      h.material.opacity = 0.45 + 0.1 * p;
-      h.scale.setScalar(1 + 0.012 * p);
-    });
   }
 
   // ---------- wind streaks ----------
@@ -177,7 +167,9 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
   }
   function onIsland(x, z) {
     for (const isl of islands) {
-      if (Math.hypot(x - isl.position[0], z - isl.position[1]) < isl.radius + 1) return true;
+      const dx = x - isl.position[0];
+      const dz = z - isl.position[1];
+      if (Math.hypot(dx, dz) < (isl.bound ?? isl.radius) + 1 && shapeOf(isl).land(dx, dz) < 0.3) return true;
     }
     return false;
   }
@@ -241,12 +233,10 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
     }
     if (route.type === 'bridge') {
       const isl = islandById.get(route.to);
-      const [x, z] = isl.position;
-      const dist = Math.hypot(x, z);
-      const dx = x / dist;
-      const dz = z / dist;
-      const d0 = hub.radius - 0.2;
-      const d1 = dist - isl.radius + 0.2;
+      const span = bridgeSpan(hub, isl); // hub edge -> island edge along the bridge, from the real shapes
+      const { dx, dz } = span;
+      const d0 = span.d0 - 0.2;
+      const d1 = span.d1 + 0.2;
       const lane = route.lane ?? 0;
       for (const d of [d0, d1]) pts.push(new THREE.Vector3(dx * d - dz * lane, BRIDGE_Y, dz * d + dx * lane));
       return { pts, mode: 'pingpong' };
@@ -486,7 +476,7 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
     if (reduce) return;
     const r = rings[ringNext++ % rings.length];
     r.age = 0;
-    r.m.position.set(x, seaY + 0.07, z);
+    r.m.position.set(x, seaY + 0.16, z); // above the highest wave crest
     r.m.visible = true;
     if (!dropsInit) {
       dropsInit = true;
@@ -549,7 +539,7 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
   // open-water test: away from every island and every hub bridge
   function waterClear(x, z) {
     for (const isl of islands) {
-      if (Math.hypot(x - isl.position[0], z - isl.position[1]) < isl.radius + dolphinZone.islandMargin) return false;
+      if (Math.hypot(x - isl.position[0], z - isl.position[1]) < (isl.bound ?? isl.radius) + dolphinZone.islandMargin) return false;
     }
     for (const isl of islands.slice(1)) {
       const [bx, bz] = isl.position;
@@ -717,31 +707,110 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
   }
 
   // ---------- race cars ----------
-  function updateCars(dt) {
+  // Cars lap the closed circuit (island.circuit.path = track centre line, island-local) on a CatmullRom curve, each with
+  // its own base speed that drifts a little over time, so they catch each other up and overtake: a car that closes in on
+  // another swings into the opposite lane while the one being passed moves over. Heading follows the path, the body leans
+  // into corners, wheels spin. The Kenney race car faces +z (front wheels at +z, rear wing at -z).
+  const track = { curve: null, len: 0 };
+  const ROAD_Y = 0.045; // top of the road pieces (0.02 model units x racing kit scale)
+  function addCar(obj, isl) {
+    if (!track.curve) {
+      const pts = isl.circuit.path.map(([x, z]) => new THREE.Vector3(x, 0, z));
+      track.curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
+      track.curve.arcLengthDivisions = 800;
+      track.len = track.curve.getLength();
+    }
+    const cfg = racing.cars[cars.length % racing.cars.length];
+    obj.rotation.order = 'YXZ';
+    const wheels = ['wheelFrontLeft', 'wheelFrontRight', 'wheelBackLeft', 'wheelBackRight'].map((n) => obj.getObjectByName(n)).filter(Boolean);
+    cars.push({
+      obj,
+      wheels,
+      cfg,
+      s: (((cfg.start % 1) + 1) % 1) * track.len,
+      lane: cfg.lane * 0.3,
+      target: cfg.lane * 0.3,
+      pref: cfg.lane * 0.3,
+      phase: Math.random() * 6.28,
+      yaw: 0,
+      rate: 0,
+      speed: cfg.speed,
+      side: 0,
+    });
+    const c = cars[cars.length - 1];
+    carPoint(c.s, c.lane, carA);
+    carPoint(c.s + 0.7, c.lane, carB);
+    c.yaw = Math.atan2(carB.x - carA.x, carB.z - carA.z);
+    obj.position.set(carA.x, ROAD_Y, carA.z);
+    obj.rotation.y = c.yaw;
+  }
+
+  const carA = new THREE.Vector3();
+  const carB = new THREE.Vector3();
+  const carT = new THREE.Vector3();
+  function carPoint(s, lane, out) {
+    const u = (((s % track.len) + track.len) % track.len) / track.len;
+    track.curve.getPointAt(u, out);
+    track.curve.getTangentAt(u, carT);
+    out.x += -carT.z * lane; // lane > 0 = right of the driving direction
+    out.z += carT.x * lane;
+    return out;
+  }
+
+  function updateCars(dt, t) {
+    if (!track.curve || !cars.length) return;
+    const L = track.len;
+    const w = racing.laneWidth;
+    // signed distance from a to b along the track, in (-L/2, L/2]; positive = b is ahead of a
+    const sgap = (a, b) => {
+      const g = (((b.s - a.s) % L) + L) % L;
+      return g > L / 2 ? g - L : g;
+    };
+    // overtaking: a car with another one close by (ahead or behind) takes a lane opposite to it and keeps it until the
+    // pair has separated again; unpaired cars drift back to their preferred lane
     for (const c of cars) {
-      const o = c.obj;
-      if (c.state === 'wait') {
-        c.timer -= dt;
-        if (c.timer <= 0) {
-          const target = c.z < (carTrack.zMin + carTrack.zMax) / 2 ? carTrack.zMax : carTrack.zMin;
-          c.from = c.z;
-          c.to = target;
-          c.k = 0;
-          c.dur = Math.abs(c.to - c.from) / CONFIG.cars.speed + 1.2;
-          c.state = 'drive';
-          c.targetYaw = c.baseYaw + (c.to > c.from ? 0 : Math.PI); // model faces +z
-        }
-      } else {
-        c.k += dt / c.dur;
-        const k = Math.min(c.k, 1);
-        c.z = THREE.MathUtils.lerp(c.from, c.to, smooth(k));
-        o.position.z = c.z;
-        if (k >= 1) {
-          c.state = 'wait';
-          c.timer = rnd(...CONFIG.cars.wait);
+      let near = null;
+      let best = racing.passGap;
+      for (const o of cars) {
+        if (o === c) continue;
+        const g = Math.abs(sgap(c, o));
+        if (g < best) {
+          best = g;
+          near = o;
         }
       }
-      if (c.targetYaw !== undefined) o.rotation.y += angleDelta(o.rotation.y, c.targetYaw) * (1 - Math.exp(-6 * dt));
+      if (!near) c.side = 0;
+      else if (!c.side) c.side = near.side ? -near.side : cars.indexOf(c) < cars.indexOf(near) ? 1 : -1;
+      c.target = c.side ? c.side * w : c.pref;
+    }
+
+    const slow = reduce ? CONFIG.carReduceSpeed : 1;
+    for (const c of cars) {
+      // base speed wanders +-9% with a slow wave, a little slower while turning hard
+      const wander = 1 + 0.09 * Math.sin(t * 0.33 + c.phase) + 0.03 * Math.sin(t * 0.91 + c.phase * 2);
+      const corner = 1 - 0.14 * smooth(Math.min(1, Math.abs(c.rate) / 1.1));
+      let want = c.cfg.speed * wander * corner;
+      // never drive into the back of a car in the same lane
+      for (const o of cars) {
+        if (o === c) continue;
+        const g = sgap(c, o);
+        if (g > 0 && g < 2.6 && Math.abs(o.lane - c.lane) < 0.8) want = Math.min(want, o.speed * (0.9 + 0.1 * Math.max(0, g - 1.9)));
+      }
+      c.speed += (want - c.speed) * (1 - Math.exp(-(c.cfg.accel ?? 1) * 2 * dt));
+      c.s = (c.s + c.speed * slow * dt) % L;
+      c.lane += (c.target - c.lane) * (1 - Math.exp(-3 * dt));
+      carPoint(c.s, c.lane, carA);
+      carPoint(c.s + 0.7, c.lane, carB);
+      const yaw = Math.atan2(carB.x - carA.x, carB.z - carA.z);
+      const dy = angleDelta(c.yaw, yaw);
+      c.rate += (dy / Math.max(dt, 1e-4) - c.rate) * (1 - Math.exp(-8 * dt));
+      c.yaw += dy;
+      const o = c.obj;
+      o.position.set(carA.x, ROAD_Y, carA.z);
+      o.rotation.y = c.yaw;
+      o.rotation.z = THREE.MathUtils.clamp(c.rate * 0.045, -0.09, 0.09); // lean to the outside of the corner
+      const spin = (c.speed * slow * dt) / 0.2;
+      for (const wh of c.wheels) wh.rotation.x += spin;
     }
   }
 
@@ -766,14 +835,15 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
       dt = Math.min(dt, 0.1);
       frame++;
       updateSway(t);
-      updateFoam(t);
       if (!reduce) updateStreaks(dt);
       updateLeaves(dt, t);
       updatePeople(dt);
       updateDolphins(dt);
       updateSplashes(dt);
       updateBirds(dt, t);
-      updateCars(dt);
+      updateCars(dt, t);
+      flights.update(dt, t);
     },
+    flights,
   };
 }

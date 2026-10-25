@@ -51,5 +51,25 @@ export const soarers = [
 // or closer than bridgeMargin to a bridge.
 export const dolphinZone = { half: 46, islandMargin: 5.5, bridgeMargin: 3.2 };
 
-// Race cars on the Yes2Games island drive along the track (island-local z range).
-export const carTrack = { island: 'yes2games-circuit', zMin: -5.4, zMax: 5.2 };
+// Race cars on the Yes2Games island lap the closed circuit continuously (island.circuit.path is the track centre line).
+// One entry per race car model on the island, in placement order. speed in world units per second, lane = sideways
+// offset from the centre line (negative = left of the driving direction), start = how far round the lap they begin (0..1).
+export const racing = {
+  island: 'yes2games-circuit',
+  cars: [
+    { speed: 5.9, lane: -0.5, start: 0.0, accel: 0.9 },
+    { speed: 5.5, lane: 0.5, start: 0.94, accel: 0.8 },
+    { speed: 5.1, lane: -0.5, start: 0.88, accel: 0.7 },
+  ],
+  laneWidth: 0.55, // lane offsets used when overtaking (centre line +/- this), keeps cars on the 2 unit wide road
+  passGap: 4.5, // two cars closer than this (along the track) take opposite lanes until they have separated
+};
+
+// Rocket and plane flights on the AR/VR Lab island (see src/flights.js). Times in seconds, distances in world units.
+//   rocket: countdown -> ascend (accel in units/s^2) until `ceiling` -> out of view for `away` -> descend (retro burn) -> settle -> idle
+//   plane:  idle -> one banked loop on an ellipse around the map at `altitude` (centre/rx/rz in world x, z) -> lands on its pad
+export const flights = {
+  island: 'ar-vr-lab',
+  rocket: { first: 9, idle: [22, 38], countdown: 3.4, accel: 6.5, ceiling: 110, away: [5, 9], descend: 8 },
+  plane: { first: 20, idle: [35, 70], speed: 15, altitude: [11, 16], center: [0, -6], rx: 48, rz: 36 },
+};
