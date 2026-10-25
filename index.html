@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#7fd8ff">
+  <meta name="description" content="MatDesu City: an interactive 3D island map portfolio of Rahmat Maulana Putra Rianto, Unity game programmer.">
+  <title>MatDesu City - Rahmat Maulana Putra Rianto</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #bfe9ff; overscroll-behavior: none; touch-action: none; }
+    body { font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif; color: #17324d; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+    #app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+    #app canvas { cursor: grab; }
+    #app canvas:active { cursor: grabbing; }
+
+    #title { position: fixed; top: 12px; left: 14px; font-size: 18px; font-weight: 800; letter-spacing: .5px; color: #fff; text-shadow: 0 2px 0 rgba(23,50,77,.35), 0 0 8px rgba(23,50,77,.3); pointer-events: none; }
+    #hint { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 7px 14px; border-radius: 999px; background: rgba(255,255,255,.82); font-size: 12px; font-weight: 700; text-align: center; pointer-events: none; transition: opacity .3s; }
+    #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,.85); font-weight: 700; font-size: 14px; pointer-events: none; transition: opacity .4s; }
+    #loading.done { opacity: 0; }
+
+    #hotspots { position: fixed; inset: 0; overflow: hidden; pointer-events: none; transition: opacity .3s; }
+    .hotspot { position: absolute; left: 0; top: 0; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; touch-action: none; display: none; will-change: transform; }
+    .hotspot .bob { display: block; animation: bob 1.8s ease-in-out infinite; }
+    .hotspot .icon { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: #fff; border: 3px solid #ffd54a; box-shadow: 0 4px 0 rgba(23,50,77,.25), 0 6px 14px rgba(23,50,77,.25); font-size: 26px; line-height: 1; transition: transform .15s; }
+    .hotspot:hover .icon, .hotspot:focus-visible .icon { transform: scale(1.12); }
+    .hotspot .label { position: absolute; top: 100%; left: 50%; transform: translate(-50%, 4px); padding: 3px 9px; border-radius: 999px; background: #17324d; color: #fff; font-size: 12px; font-weight: 700; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; }
+    .hotspot:hover .label, .hotspot:focus-visible .label { opacity: 1; }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    body.card-open #hotspots { opacity: 0; pointer-events: none; }
+    body.card-open #hotspots .hotspot { pointer-events: none; }
+    body.card-open #hint { opacity: 0; }
+
+  </style>
+  <link rel="stylesheet" href="src/ui.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="hotspots"></div>
+  <div id="title">MatDesu City</div>
+  <div id="hud">
+    <button id="quest-pill" type="button" aria-label="Badges collected">🏅 <span id="quest-count">0/9</span></button>
+    <a id="classic-link" href="https://rahmat-mpr.github.io/" target="_blank" rel="noopener">Classic portfolio ↗</a>
+  </div>
+  <div id="toast" role="status"></div>
+  <div id="hint">Drag to explore &middot; Scroll/pinch to zoom &middot; Tap an icon &middot; Collect all 9 badges</div>
+  <div id="loading">Loading models&hellip;</div>
+
+  <div id="card" role="dialog" aria-labelledby="card-title">
+    <button id="card-close" aria-label="Close">&#x2715;</button>
+    <div id="card-scroll">
+      <h2 id="card-title"></h2>
+      <p id="card-desc"></p>
+      <div id="card-content"></div>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
