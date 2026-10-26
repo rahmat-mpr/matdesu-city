@@ -9,6 +9,7 @@ Only the models actually used are included in `assets/models/`. License text: `a
 - City Kit (Commercial): https://kenney.nl/assets/city-kit-commercial
 - City Kit (Suburban): https://kenney.nl/assets/city-kit-suburban
 - Space Kit: https://kenney.nl/assets/space-kit
+- Holiday Kit: https://kenney.nl/assets/holiday-kit
 - Mini Characters: https://kenney.nl/assets/mini-characters
 
 Rendering: [Three.js](https://threejs.org) r170 (MIT), loaded from the jsDelivr CDN.

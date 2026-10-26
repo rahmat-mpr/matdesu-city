@@ -1,4 +1,4 @@
-// Ambient life for MatDesu City: walking people, wind sway, falling leaves, jumping dolphins, birds,
+// Ambient life for MatDesu City: walking people, wind sway, biome particles (leaves, snow, dust...), jumping dolphins, birds,
 // race cars lapping the circuit, rocket / plane flights (src/flights.js). Everything is driven by one `update(dt, t)`
 // call from the main loop. Layout/route data lives in data/ambient.js. (Shore foam is part of the sea shader, src/sea.js.)
 import * as THREE from 'three';
@@ -7,6 +7,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { SKINS, walkers, loiterers, flocks, soarers, dolphinZone, racing, flights as flightCfg } from '../data/ambient.js';
 import { shapeOf, bridgeSpan } from './shapes.js';
 import { createFlights } from './flights.js';
+import { BIOMES, PARTICLES } from '../data/biomes.js';
 
 // ---------- config (counts / speeds) ----------
 const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -16,8 +17,7 @@ const CONFIG = {
   walkSpeed: 1.0, // world units per second
   walkAnimRef: 1.0, // walk speed at which the clip plays at timeScale 1
   mixerFarHeight: 46, // camera height (zoomed out) above which mixers tick every other frame
-  leaves: coarse ? 70 : 150,
-  leafFall: [0.45, 0.8], // m/s
+  particleTtl: 12, // seconds before a particle that never landed fades out (drifted out to sea)
   windDir: new THREE.Vector3(1, 0, 0.35).normalize(),
   windStreaks: coarse ? 5 : 9,
   dolphins: coarse ? 3 : 4,
@@ -45,9 +45,8 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
 
   const gust = (t) => 0.75 + 0.25 * Math.sin(t * 0.31) + 0.12 * Math.sin(t * 0.83 + 1.3);
 
-  // ---------- props: wind sway, tree sources for leaves, race cars ----------
+  // ---------- props: wind sway, tree sources for particles, race cars ----------
   const sway = []; // { obj, amp, freq, phase, flag, baseY }
-  const treeSpots = []; // world positions of tree crowns (leaf spawn)
   const cars = [];
   const flights = createFlights({ scene, camera, islands, islandRoots, cfg: flightCfg, reduceQuery });
 
@@ -60,7 +59,8 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
     if (/^tree/.test(name)) {
       amp = 0.028;
       freq = 1.0;
-      treeSpots.push({ x: isl.position[0] + placement.x, z: isl.position[1] + placement.z });
+      const key = particleKey(isl);
+      if (key && PARTICLES[key].from === 'trees') particleSet(key).spots.push({ x: isl.position[0] + placement.x, z: isl.position[1] + placement.z, r: 1 });
     } else if (/^plant|^bush/.test(name)) {
       amp = 0.035;
       freq = 1.5;
@@ -131,39 +131,50 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
     }
   }
 
-  // ---------- falling leaves ----------
-  const leaves = {
-    mesh: null,
-    n: CONFIG.leaves,
-    px: null, py: null, pz: null, vy: null, ph: null, spin: null, age: null, life: null, size: null,
-    ready: false,
-  };
+  // ---------- biome particles (data/biomes.js): leaves / blossom under trees, dust, snow, rising motes over islands ----------
   const dummy = new THREE.Object3D();
-  {
-    const geo = new THREE.PlaneGeometry(0.3, 0.22);
-    const mat = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-    const mesh = new THREE.InstancedMesh(geo, mat, leaves.n);
-    const palette = [0x6cc24a, 0x8fd14f, 0xf2a93b, 0xe8742c, 0xf4d03f].map((c) => new THREE.Color(c));
-    for (let i = 0; i < leaves.n; i++) mesh.setColorAt(i, palette[i % palette.length]);
+  const particleSets = new Map(); // particle key -> { cfg, n, mesh, spots, ready, px, py, ... }
+  const particleKey = (isl) => (BIOMES[isl.biome] ?? BIOMES.meadow).particle;
+  function particleSet(key) {
+    let p = particleSets.get(key);
+    if (p) return p;
+    const cfg = PARTICLES[key];
+    const n = coarse ? Math.ceil(cfg.n / 2) : cfg.n;
+    const geo = new THREE.PlaneGeometry(cfg.size[0], cfg.size[1]);
+    const Mat = cfg.glow ? THREE.MeshBasicMaterial : THREE.MeshLambertMaterial;
+    const mesh = new THREE.InstancedMesh(geo, new Mat({ color: 0xffffff, side: THREE.DoubleSide }), n);
+    const palette = cfg.palette.map((c) => new THREE.Color(c));
+    for (let i = 0; i < n; i++) mesh.setColorAt(i, palette[i % palette.length]);
     mesh.instanceColor.needsUpdate = true;
     mesh.frustumCulled = false;
     mesh.count = 0;
     scene.add(mesh);
-    leaves.mesh = mesh;
-    for (const k of ['px', 'py', 'pz', 'vy', 'ph', 'spin', 'age', 'life', 'size']) leaves[k] = new Float32Array(leaves.n);
+    p = { cfg, n, mesh, spots: [], ready: false };
+    for (const k of ['px', 'py', 'pz', 'vy', 'ph', 'spin', 'age', 'life', 'size']) p[k] = new Float32Array(n);
+    particleSets.set(key, p);
+    return p;
   }
-  function respawnLeaf(i, scatter) {
-    const src = treeSpots[(Math.random() * treeSpots.length) | 0];
-    leaves.px[i] = src.x + rnd(-1, 1);
-    leaves.pz[i] = src.z + rnd(-1, 1);
-    leaves.py[i] = rnd(2.2, 4.6);
-    leaves.vy[i] = rnd(...CONFIG.leafFall);
-    leaves.ph[i] = Math.random() * 6.28;
-    leaves.spin[i] = rnd(1.5, 4) * (Math.random() < 0.5 ? -1 : 1);
-    leaves.size[i] = rnd(0.7, 1.2);
-    leaves.life[i] = 0; // 0 = falling, >0 = shrinking on the ground
-    leaves.age[i] = 0;
-    if (scatter) leaves.py[i] = rnd(0.1, 4.2);
+  // 'island' particles spawn anywhere over the grass of their islands ('trees' ones are added by addProp)
+  for (const isl of islands) {
+    const key = particleKey(isl);
+    if (key && PARTICLES[key].from === 'island') particleSet(key).spots.push({ x: isl.position[0], z: isl.position[1], r: shapeOf(isl).core });
+  }
+
+  function respawnParticle(p, i, scatter) {
+    const { cfg } = p;
+    const src = p.spots[(Math.random() * p.spots.length) | 0];
+    const a = Math.random() * Math.PI * 2;
+    const d = Math.sqrt(Math.random()) * src.r;
+    p.px[i] = src.x + Math.cos(a) * d;
+    p.pz[i] = src.z + Math.sin(a) * d;
+    p.py[i] = rnd(...cfg.y);
+    p.vy[i] = rnd(...cfg.fall);
+    p.ph[i] = Math.random() * 6.28;
+    p.spin[i] = rnd(...cfg.spin) * (Math.random() < 0.5 ? -1 : 1);
+    p.size[i] = rnd(0.7, 1.2);
+    p.life[i] = 0; // 0 = drifting, >0 = shrinking (landed, risen to the top or too old)
+    p.age[i] = scatter ? Math.random() * 4 : 0;
+    if (scatter && cfg.fall[0] > 0) p.py[i] = rnd(0.1, cfg.y[1]);
   }
   function onIsland(x, z) {
     for (const isl of islands) {
@@ -173,46 +184,49 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
     }
     return false;
   }
-  function updateLeaves(dt, t) {
-    const mesh = leaves.mesh;
-    if (reduce || !treeSpots.length) {
-      mesh.count = 0;
-      leaves.ready = false;
-      return;
-    }
-    if (!leaves.ready) {
-      for (let i = 0; i < leaves.n; i++) respawnLeaf(i, true);
-      leaves.ready = true;
-      mesh.count = leaves.n;
-    }
+  function updateParticles(dt, t) {
     const g = gust(t);
-    for (let i = 0; i < leaves.n; i++) {
-      leaves.age[i] += dt;
-      const a = leaves.age[i];
-      let fade = Math.min(a / 0.4, 1);
-      if (leaves.life[i] > 0) {
-        leaves.life[i] += dt;
-        fade = Math.max(0, 1 - leaves.life[i] / 0.4);
-        if (fade <= 0) respawnLeaf(i, false);
-      } else {
-        const ph = leaves.ph[i];
-        leaves.px[i] += (wind.x * 0.9 * g + Math.sin(t * 1.3 + ph) * 0.4) * dt;
-        leaves.pz[i] += (wind.z * 0.9 * g + Math.cos(t * 1.1 + ph) * 0.3) * dt;
-        leaves.py[i] -= leaves.vy[i] * dt * (0.8 + 0.4 * Math.sin(t * 2 + ph));
-        const y = leaves.py[i];
-        if (y <= 0 && (onIsland(leaves.px[i], leaves.pz[i]) || y <= seaY)) {
-          leaves.py[i] = Math.max(y, seaY);
-          leaves.life[i] = 0.001;
-        }
+    for (const p of particleSets.values()) {
+      const { cfg, mesh } = p;
+      if (reduce || !p.spots.length) {
+        mesh.count = 0;
+        p.ready = false;
+        continue;
       }
-      const ph = leaves.ph[i];
-      dummy.position.set(leaves.px[i], leaves.py[i], leaves.pz[i]);
-      dummy.rotation.set(t * leaves.spin[i] + ph, t * leaves.spin[i] * 0.6, Math.sin(t * 2 + ph) * 0.8);
-      dummy.scale.setScalar(Math.max(fade, 0.0001) * leaves.size[i]);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
+      if (!p.ready) {
+        for (let i = 0; i < p.n; i++) respawnParticle(p, i, true);
+        p.ready = true;
+        mesh.count = p.n;
+      }
+      for (let i = 0; i < p.n; i++) {
+        p.age[i] += dt;
+        const a = p.age[i];
+        const ph = p.ph[i];
+        let fade = Math.min(a / 0.4, 1);
+        if (p.life[i] > 0) {
+          p.life[i] += dt;
+          fade = Math.max(0, 1 - p.life[i] / 0.4);
+          if (fade <= 0) respawnParticle(p, i, false);
+        } else {
+          p.px[i] += (wind.x * cfg.windK * g + Math.sin(t * 1.3 + ph) * cfg.drift) * dt;
+          p.pz[i] += (wind.z * cfg.windK * g + Math.cos(t * 1.1 + ph) * cfg.drift * 0.75) * dt;
+          p.py[i] -= p.vy[i] * dt * (0.8 + 0.4 * Math.sin(t * 2 + ph));
+          const y = p.py[i];
+          if (p.vy[i] > 0 && y <= 0 && (onIsland(p.px[i], p.pz[i]) || y <= seaY)) {
+            p.py[i] = Math.max(y, seaY);
+            p.life[i] = 0.001;
+          } else if ((cfg.top && y >= cfg.top) || a > CONFIG.particleTtl) {
+            p.life[i] = 0.001;
+          }
+        }
+        dummy.position.set(p.px[i], p.py[i], p.pz[i]);
+        dummy.rotation.set(t * p.spin[i] + ph, t * p.spin[i] * 0.6, Math.sin(t * 2 + ph) * 0.8);
+        dummy.scale.setScalar(Math.max(fade, 0.0001) * p.size[i]);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
     }
-    mesh.instanceMatrix.needsUpdate = true;
   }
 
   // ---------- people ----------
@@ -836,7 +850,7 @@ export function createAmbient({ scene, camera, islands, islandRoots, loader, sea
       frame++;
       updateSway(t);
       if (!reduce) updateStreaks(dt);
-      updateLeaves(dt, t);
+      updateParticles(dt, t);
       updatePeople(dt);
       updateDolphins(dt);
       updateSplashes(dt);

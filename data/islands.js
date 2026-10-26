@@ -5,6 +5,8 @@
 // Coordinates: x = east, z = south (towards the default camera), y = up. The sea surface is below y = 0;
 // each island top is at y = 0 (terraces / rock islets rise above it). Placements are in island-local coordinates.
 //
+// Biome: `biome` is a key of data/biomes.js (ground / sand / rock colours, tree tint, drifting particles).
+//
 // Shape: `shape: { kind, ... }` is turned into an outline by src/shapes.js (see the parameter list there): oval, box,
 // kidney with a bay, lobes, circuit-hugging polygon, sand spits, terraces with cliff walls, rocky shores, islets.
 // `radius` is the rough grass radius (camera framing); the true bounds are computed from the shape.
@@ -24,6 +26,7 @@ export const KIT_SCALE = {
   commercial: 2.2,
   suburban: 2.2,
   space: 1.1,
+  holiday: 1.05,
 };
 
 // n copies of one model spaced around an ellipse (rx, ry; ry defaults to rx), small deterministic variation in rotation and size.
@@ -62,11 +65,12 @@ const nsr = buildCircuit({
     { c: 'L', size: 'large' },
   ],
 });
-// trees and bushes on the grass strip just outside the track (skips the bridge landing at the south middle)
+// cacti and rocks on the sand strip just outside the track (skips the bridge landing at the south middle)
 const nsrTrim = nsr.path
   .map(([x, z], i) => {
     const d = Math.hypot(x, z) || 1;
-    return { m: i % 6 === 0 ? 'nature/plant_bush' : 'racing/treeSmall', x: x + (x / d) * 2.5, z: z + (z / d) * 2.5, s: i % 6 === 0 ? 1.5 : 1.2, i };
+    const m = i % 6 === 0 ? 'nature/rock_smallA' : i % 2 ? 'nature/cactus_tall' : 'nature/cactus_short';
+    return { m, x: x + (x / d) * 2.5, z: z + (z / d) * 2.5, r: (i * 47) % 360, s: m === 'nature/rock_smallA' ? 1.6 : 1.5, i };
   })
   .filter((p) => p.i % 3 === 0 && !(p.z > 4 && Math.abs(p.x) < 3.2))
   .map(({ i, ...p }) => p);
@@ -82,7 +86,8 @@ export const islands = [
     seed: 0.3,
     // the hub stays a round plaza island with a generous beach (every bridge starts here)
     shape: { kind: 'blob', r: 7.5, wobble: 0.06, beach: 1.2, beachBump: { angle: 90, extra: 1.3, span: 45 } },
-    theme: { grass: '#86dc5c', sand: '#f6e3b0', emoji: '\u{1F3DB}️' },
+    biome: 'meadow',
+    theme: { emoji: '\u{1F3DB}️' },
     hotspot: [0, 5.5, 0],
     section: 'profile',
     projects: [],
@@ -113,7 +118,8 @@ export const islands = [
     // land hugs the race circuit (polygon of the track centre line pushed out by `margin`)
     shape: { kind: 'circuit', margin: 3.6, wobble: 0, beach: 1.0 },
     circuit: { path: nsr.path, start: nsr.startPoint, heading: nsr.startHeading },
-    theme: { grass: '#8fd860', sand: '#f2dfae', emoji: '\u{1F3CE}️' },
+    biome: 'desert',
+    theme: { emoji: '\u{1F3CE}️' },
     hotspot: [0, 4.5, 0],
     projects: ['nsr'],
     archive: [],
@@ -156,8 +162,9 @@ export const islands = [
     radius: 6.7,
     seed: 2.9,
     // city block: rounded square with a paved plaza and a narrow quay-like beach
-    shape: { kind: 'box', a: 6.9, b: 5.5, corner: 2.6, rotation: 0, beach: 0.8, paved: { inset: 1.3, color: '#d9dcd9' } },
-    theme: { grass: '#7fd96b', sand: '#f7e0b5', emoji: '\u{1F6CD}️' },
+    shape: { kind: 'box', a: 6.9, b: 5.5, corner: 2.6, rotation: 0, beach: 0.8, paved: { inset: 1.3, color: '#2c3044' } },
+    biome: 'neon',
+    theme: { emoji: '\u{1F6CD}️' },
     hotspot: [0, 5.5, -1],
     projects: ['disney-piano', 'adelle-score-board'],
     archive: [],
@@ -174,8 +181,8 @@ export const islands = [
       { m: 'commercial/detail-parasol-b', x: -3.4, z: 3.2, s: 2 },
       ...ring('nature/plant_bush', 6, 5.6, 60, 1.4, 4.1),
       ...ring('nature/flower_purpleA', 5, 4.2, 20, 1.8, 3.4),
-      { m: 'nature/tree_small', x: 5.2, z: 0.0, s: 1.2 },
-      { m: 'nature/tree_small', x: -5.2, z: -0.5, s: 1.2 },
+      { m: 'space/satelliteDish', x: 5.2, z: 0.0, r: -60, s: 1.6 },
+      { m: 'space/machine_generator', x: -5.2, z: -0.5, r: 90, s: 1.4 },
     ],
   },
   {
@@ -194,7 +201,8 @@ export const islands = [
       beach: 1.3,
       islets: [{ x: 0.4, z: 6.4, r: 0.9, kind: 'sand' }],
     },
-    theme: { grass: '#92dd5a', sand: '#f8dfa8', emoji: '\u{1F579}️' },
+    biome: 'summer',
+    theme: { emoji: '\u{1F579}️' },
     hotspot: [0, 5, -1],
     projects: ['magica-planta-botanica', 'school-beat'],
     archive: [],
@@ -214,8 +222,10 @@ export const islands = [
       { m: 'commercial/detail-parasol-b', x: -2.8, z: -0.4, s: 2 },
       ...ring('nature/flower_redA', 12, 4.6, 190, 1.8, 3.6).filter((p) => p.z < 0.2),
       ...ring('nature/flower_yellowA', 12, 5.2, 200, 1.8, 4.1).filter((p) => p.z < 0.2),
-      { m: 'nature/tree_fat', x: 6.2, z: 0.4, s: 1.1 },
-      { m: 'nature/tree_fat', x: -6.2, z: 0.2, s: 1.1 },
+      { m: 'nature/tree_palmDetailedTall', x: 6.2, z: 0.4, r: 30, s: 1.2 },
+      { m: 'nature/tree_palmDetailedShort', x: 5.4, z: -2.4, r: 140, s: 1.1 },
+      { m: 'nature/tree_palmDetailedTall', x: -6.2, z: 0.2, r: 200, s: 1.2 },
+      { m: 'nature/tree_palmDetailedShort', x: -5.6, z: -2.6, r: 80, s: 1.1 },
       { m: 'nature/tree_palm', x: 0.4, z: 6.4, s: 1.1 },
     ],
   },
@@ -235,15 +245,16 @@ export const islands = [
       beach: 1.0,
       beachBump: { angle: 40, extra: 1.2, span: 35 },
       terraces: [
-        { x: -1.6, z: -1.8, a: 5.3, b: 4.4, rot: -15, y: 0.85, cap: '#79d99f' },
-        { x: -2.4, z: -2.6, a: 3.0, b: 2.5, rot: -15, y: 1.7, cap: '#86e0b2' },
+        { x: -1.6, z: -1.8, a: 5.3, b: 4.4, rot: -15, y: 0.85 },
+        { x: -2.4, z: -2.6, a: 3.0, b: 2.5, rot: -15, y: 1.7 },
       ],
       islets: [
         { x: -8.6, z: -2.2, r: 1.0, kind: 'rock' },
         { x: -6.0, z: -8.6, r: 0.9, kind: 'rock' },
       ],
     },
-    theme: { grass: '#7ee0a8', sand: '#dff2e8', emoji: '\u{1F97D}' },
+    biome: 'future',
+    theme: { emoji: '\u{1F97D}' },
     hotspot: [0, 6, -1.5],
     projects: ['ar-magazine', 'giz-solar-vr', 'petro-360'],
     archive: ['ar-name-card', 'senalapan', 'brodo-shoes', 'ar-foundation'],
@@ -267,6 +278,9 @@ export const islands = [
       { m: 'space/rock_crystals', x: -6.0, z: -8.6, r: 60, s: 1.3 },
       { m: 'space/rocks_smallA', x: -0.4, z: 1.8, s: 1.4 },
       { m: 'space/barrels', x: 0.6, z: 4.6, s: 1.2 },
+      { m: 'space/rover', x: 2.4, z: 0.8, r: -30, s: 2.2 },
+      { m: 'space/astronautA', x: -0.6, z: 3.2, r: 160, s: 0.75 },
+      { m: 'space/machine_generator', x: 3.2, z: -2.6, r: 20, s: 1.3 },
     ],
   },
   {
@@ -287,7 +301,8 @@ export const islands = [
       beachBump: { angle: 100, extra: 1.5, span: 40 },
       islets: [{ x: 10.6, z: 4.2, r: 1.0, kind: 'sand' }],
     },
-    theme: { grass: '#8ad65e', sand: '#f4deaa', emoji: '\u{1F3AE}' },
+    biome: 'autumn',
+    theme: { emoji: '\u{1F3AE}' },
     hotspot: [0, 4, 0],
     projects: ['unrivaled-heroes', 'haremking', 'g-project', 'worker-brawler'],
     archive: ['the-lost-lamb', 'food-tycoon'],
@@ -302,11 +317,16 @@ export const islands = [
       { m: 'suburban/fence', x: 0.0, z: 3.8 },
       { m: 'suburban/fence', x: 1.05, z: 3.8 },
       { m: 'suburban/fence', x: 2.1, z: 3.8 },
-      ...ring('nature/tree_default', 4, 7.0, 30, 1.1, 3.9),
-      ...ring('nature/tree_oak', 3, 6.6, 200, 1.1, 3.6),
+      ...ring('nature/tree_default_fall', 4, 7.0, 30, 1.1, 3.9),
+      ...ring('nature/tree_oak_fall', 3, 6.6, 200, 1.1, 3.6),
       { m: 'nature/stump_round', x: 0.8, z: 2.0, s: 1.5 },
       ...ring('nature/flower_yellowA', 5, 2.4, 0, 1.8),
-      { m: 'nature/tree_palmBend', x: 10.6, z: 4.2, s: 1.1 },
+      { m: 'nature/crop_pumpkin', x: -1.6, z: 2.3, r: 20, s: 1.6 },
+      { m: 'nature/crop_pumpkin', x: -1.0, z: 2.7, r: 70, s: 1.3 },
+      { m: 'nature/crop_pumpkin', x: 2.0, z: 2.6, r: 140, s: 1.5 },
+      { m: 'nature/log_stack', x: 5.6, z: 2.6, r: 15, s: 1.6 },
+      { m: 'nature/mushroom_redGroup', x: -5.6, z: 2.4, s: 2.0 },
+      { m: 'nature/tree_thin_fall', x: 10.6, z: 4.2, s: 1.1 },
     ],
   },
   {
@@ -328,7 +348,8 @@ export const islands = [
         { x: 8.2, z: -4.0, r: 0.8, kind: 'rock' },
       ],
     },
-    theme: { grass: '#a0e268', sand: '#f6e1b3', emoji: '✉️' },
+    biome: 'snow',
+    theme: { emoji: '✉️' },
     hotspot: [0, 4, 0],
     section: 'contact',
     projects: [],
@@ -339,14 +360,17 @@ export const islands = [
       { m: 'car/box', x: 2.0, z: 2.4, r: -10, s: 0.5 },
       { m: 'suburban/planter', x: -1.2, z: 0.9, s: 1.5 },
       { m: 'suburban/planter', x: 1.2, z: 0.9, s: 1.5 },
-      ...ring('nature/flower_redA', 5, 3.3, 20, 1.8),
-      ...ring('nature/tree_oak', 4, 4.0, 30, 1.1),
-      { m: 'nature/plant_bush', x: -3.4, z: 0.8, s: 1.5 },
-      { m: 'nature/plant_bush', x: 3.4, z: 0.4, s: 1.5 },
-      // spit: palms and a canoe
-      { m: 'nature/tree_palm', x: 6.2, z: 1.2, s: 1.1 },
-      { m: 'nature/tree_palmTall', x: 9.4, z: 1.4, s: 1.0 },
-      { m: 'nature/canoe', x: 7.8, z: 2.1, r: 100, s: 1.0 },
+      { m: 'holiday/present-a-cube', x: 2.6, z: 2.0, r: 25, s: 1.8 },
+      { m: 'holiday/present-b-round', x: 2.4, z: 2.9, s: 1.6 },
+      { m: 'holiday/snowman', x: -3.2, z: 2.2, r: -30, s: 1.25 },
+      { m: 'holiday/lantern', x: -1.0, z: 3.4, s: 0.7 },
+      ...ring('holiday/tree-snow-a', 4, 4.0, 30, 1).map((p, i) => ({ ...p, m: `holiday/tree-snow-${'abca'[i]}` })),
+      { m: 'holiday/snow-pile', x: -3.4, z: 0.8, s: 2.2 },
+      { m: 'holiday/snow-pile', x: 3.4, z: 0.4, s: 1.8 },
+      // spit: snowy pines and a sled
+      { m: 'holiday/tree-snow-b', x: 6.2, z: 1.2, s: 0.9 },
+      { m: 'holiday/tree-snow-c', x: 9.4, z: 1.4, s: 0.8 },
+      { m: 'holiday/sled', x: 7.8, z: 2.1, r: 100, s: 1.3 },
       { m: 'nature/rock_largeA', x: -4.8, z: 5.6, s: 1.2 },
       { m: 'nature/rock_tallD', x: 8.2, z: -4.0, s: 1.1 },
     ],
@@ -369,7 +393,8 @@ export const islands = [
       wobble: 0.03,
       beach: 1.1,
     },
-    theme: { grass: '#9be06a', sand: '#fbe3b8', emoji: '\u{1F3A8}' },
+    biome: 'spring',
+    theme: { emoji: '\u{1F3A8}' },
     hotspot: [0, 4, 0],
     projects: ['chef-story', 'virgo-sparkling'],
     archive: ['mojiken-vn', 'yumi'],
@@ -410,13 +435,14 @@ export const islands = [
       wobble: 0.05,
       beach: 0.9,
       rocky: [{ from: 135, to: 255 }],
-      terraces: [{ x: -4.4, z: 0.6, a: 2.7, b: 4.4, rot: 0, y: 1.5, cap: '#8fcf7b' }],
+      terraces: [{ x: -4.4, z: 0.6, a: 2.7, b: 4.4, rot: 0, y: 1.5 }],
       islets: [
         { x: -8.6, z: 2.4, r: 1.1, kind: 'rock' },
         { x: -7.4, z: -4.4, r: 0.8, kind: 'rock' },
       ],
     },
-    theme: { grass: '#6fd070', sand: '#f3e0b0', emoji: '\u{1F393}' },
+    biome: 'autumn',
+    theme: { emoji: '\u{1F393}' },
     hotspot: [0, 10.8, -1],
     section: 'pens',
     projects: ['distance'],
@@ -427,7 +453,8 @@ export const islands = [
       { m: 'commercial/building-l', x: 3.6, z: -1.0 },
       { m: 'commercial/building-n', x: 1.0, z: 2.4, s: 0.7 },
       { m: 'nature/sign', x: -1.4, z: 3.6, r: 15, s: 2.0 },
-      ...ring('nature/tree_oak', 5, 5.0, 50, 1.2, 4.4),
+      ...ring('nature/tree_oak_fall', 3, 5.0, 50, 1.2, 4.4),
+      ...ring('nature/tree_detailed_fall', 2, 5.0, 20, 1.2, 4.4),
       ...ring('nature/flower_purpleA', 5, 3.5, 10, 1.8, 3.2),
       { m: 'nature/plant_bush', x: -1.6, z: 0.6, s: 1.5 },
       { m: 'nature/plant_bush', x: 4.4, z: 1.6, s: 1.5 },

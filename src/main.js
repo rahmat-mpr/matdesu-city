@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MapControls } from 'three/addons/controls/MapControls.js';
 import { islands, KIT_SCALE } from '../data/islands.js';
+import { BIOMES } from '../data/biomes.js';
 import { createAmbient } from './ambient.js';
 import { shapeOf, bridgeSpan } from './shapes.js';
-import { buildIslandGeometry } from './islandMesh.js';
+import { buildIslandGeometry, buildIslandGrid } from './islandMesh.js';
 import { createSea } from './sea.js';
 import { createQuest, createPlayOverlay, createCardUI } from './ui.js';
 
@@ -114,6 +115,8 @@ function buildIsland(isl) {
   mesh.userData.islandId = isl.id;
   root.add(mesh);
   pickMeshes.push(mesh);
+  const grid = buildIslandGrid(isl, shapeOf(isl)); // futuristic biomes only
+  if (grid) root.add(grid);
 
   scene.add(root);
   islandRoots.set(isl.id, root);
@@ -158,6 +161,7 @@ function toLambert(src) {
   let m = lambertCache.get(src.uuid);
   if (!m) {
     m = new THREE.MeshLambertMaterial({
+      name: src.name, // biome recolor matches on it
       color: src.color,
       map: src.map,
       transparent: src.transparent,
@@ -195,10 +199,26 @@ function loadModel(key) {
   });
 }
 
+// biome tint for tree models (e.g. spring: green leaves -> pink blossom), one material per source material + biome
+const recolorCache = new Map();
+function recolor(obj, map, biome) {
+  obj.traverse((o) => {
+    if (!o.isMesh || !map[o.material.name]) return;
+    const key = `${biome}:${o.material.uuid}`;
+    if (!recolorCache.has(key)) {
+      const m = o.material.clone();
+      m.color.set(map[o.material.name]);
+      recolorCache.set(key, m);
+    }
+    o.material = recolorCache.get(key);
+  });
+}
+
 function placeModels() {
   for (const isl of islands) {
     const root = islandRoots.get(isl.id);
     const shape = shapeOf(isl);
+    const tint = BIOMES[isl.biome]?.recolor;
     for (const p of isl.models) {
       const tpl = templates.get(p.m);
       if (!tpl) continue;
@@ -207,6 +227,7 @@ function placeModels() {
         continue;
       }
       const obj = tpl.clone();
+      if (tint && /^tree/.test(p.m.split('/')[1])) recolor(obj, tint, isl.biome);
       obj.scale.setScalar(KIT_SCALE[p.m.split('/')[0]] * (p.s ?? 1));
       obj.position.set(p.x, (p.y ?? 0) + shape.height(p.x, p.z), p.z); // sits on terraces, beaches and islets
       obj.rotation.y = THREE.MathUtils.degToRad(p.r ?? 0);

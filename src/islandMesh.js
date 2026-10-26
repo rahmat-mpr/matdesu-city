@@ -1,4 +1,4 @@
-// Builds the terrain mesh of one island (single mesh, vertex colours) from its shape (src/shapes.js):
+// Builds the terrain mesh of one island (single mesh, vertex colours) from its shape (src/shapes.js) and biome (data/biomes.js):
 //   - sand slab + earth underside tapering below the waterline,
 //   - grass slab (the island top is y = 0),
 //   - terraces (raised grass ellipses with rock cliff walls), paved plaza,
@@ -6,17 +6,13 @@
 // Every slab is a polar "loft": rings of radii around a centre, walls between rings, a fan cap on top.
 import * as THREE from 'three';
 import { SAND_TOP, WATER_INSET, ISLET_INSET, ROCK_TOP } from './shapes.js';
+import { BIOMES } from '../data/biomes.js';
 
 const TAU = Math.PI * 2;
 const col = (c) => new THREE.Color(c);
 const mix = (a, b, t) => a.clone().lerp(b, t);
 const shade = (c, l, s = 0) => c.clone().offsetHSL(0, s, l);
 
-const ROCK = col('#a89983');
-const ROCK_DARK = col('#85776a');
-const ROCK_LIGHT = col('#c2b39a');
-const EARTH = col('#8a5a3c');
-const EARTH_DARK = col('#65412c');
 
 class Builder {
   constructor() {
@@ -70,11 +66,17 @@ class Builder {
 // Island body. Returns the merged geometry.
 export function buildIslandGeometry(isl, shape) {
   const b = new Builder();
-  const grass = col(isl.theme.grass);
-  const sand = col(isl.theme.sand);
+  const bio = BIOMES[isl.biome] ?? BIOMES.meadow;
+  const grass = col(bio.ground);
+  const sand = col(bio.sand);
+  const ROCK = col(bio.rock);
+  const ROCK_DARK = col(bio.rockDark);
+  const ROCK_LIGHT = col(bio.rockLight);
+  const EARTH = col(bio.earth);
+  const EARTH_DARK = col(bio.earthDark);
   const N = isl.shape?.kind === 'circuit' ? 160 : 96;
   const rockyAt = shape.rockyAt;
-  const rockSand = col('#b9ad9b');
+  const rockSand = mix(sand, ROCK_LIGHT, 0.6);
 
   // --- sand slab + underside (contours of the sand outline, inset towards the bottom) ---
   const sand0 = shape.contour(shape.sand, 0, N);
@@ -131,4 +133,35 @@ export function buildIslandGeometry(isl, shape) {
     b.wall(it.x, it.z, mid, -1.8, () => ROCK_DARK, low, -3.0, () => EARTH_DARK);
   }
   return b.geometry();
+}
+
+// Futuristic biomes: a glowing grid on the ground plus a rim line along the grass edge (unlit lines, island-local).
+// Returns null for biomes without `grid`. Grid lines stop short of the edge and skip terraces; they sit on top of a paved plaza.
+export function buildIslandGrid(isl, shape) {
+  const grid = BIOMES[isl.biome]?.grid;
+  if (!grid) return null;
+  const pts = [];
+  const Y = shape.paved ? 0.07 : 0.03;
+  const inside = (x, z) => shape.body(x, z) < -0.35 && !shape.terraces.some((t) => t.sdf(x, z) < 0.05);
+  const ext = shape.core + 1;
+  const seg = 0.25;
+  for (const axis of [0, 1]) {
+    for (let u = -ext; u <= ext; u += grid.step) {
+      for (let v = -ext; v < ext; v += seg) {
+        const [x0, z0, x1, z1] = axis ? [u, v, u, v + seg] : [v, u, v + seg, u];
+        if (inside(x0, z0) && inside(x1, z1)) pts.push(x0, Y, z0, x1, Y, z1);
+      }
+    }
+  }
+  const N = 96;
+  const rim = shape.contour(shape.body, -0.12, N);
+  for (let i = 0; i < N; i++) {
+    const a0 = (i / N) * TAU;
+    const a1 = ((i + 1) / N) * TAU;
+    const r1 = rim[(i + 1) % N];
+    pts.push(Math.cos(a0) * rim[i], Y, Math.sin(a0) * rim[i], Math.cos(a1) * r1, Y, Math.sin(a1) * r1);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  return new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: grid.color, transparent: true, opacity: 0.85 }));
 }
