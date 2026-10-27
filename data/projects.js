@@ -22,6 +22,7 @@ export const contact = {
   email: 'rahmatmpr@rocketmail.com',
   linkedin: 'https://www.linkedin.com/in/rahmatmpr/',
   classic: CLASSIC_URL,
+  cv: 'assets/cv/Rahmat-Maulana-Putra-Rianto-CV.pdf', // linked from Town Square (About me) and Post Office
 };
 
 // "Where I've worked". Entries with studio: null show role, dates and place only.

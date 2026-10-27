@@ -167,6 +167,7 @@ export function createCardUI({ islands, quest, els, play }) {
         h('div', null, h('h3', { text: profile.name }), h('p', { class: 'headline', text: profile.headline }), h('p', { class: 'loc', text: profile.location }))
       ),
       h('p', { text: profile.intro }),
+      h('div', { class: 'links' }, extLink({ label: 'Download CV (PDF)', url: contact.cv }, 'btn primary')),
       facts([
         { title: 'Skills', text: profile.skills },
         { title: 'QA', text: profile.qa },
@@ -203,6 +204,7 @@ export function createCardUI({ islands, quest, els, play }) {
       'div',
       { class: 'links' },
       h('a', { class: 'btn primary', href: `mailto:${contact.email}`, text: `Email ${contact.email}` }),
+      extLink({ label: 'CV (PDF)', url: contact.cv }, 'btn'),
       extLink({ label: 'LinkedIn', url: contact.linkedin }, 'btn'),
       extLink({ label: 'Classic portfolio ↗', url: contact.classic }, 'btn')
     );
