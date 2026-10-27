@@ -2,13 +2,13 @@
 //
 // The circuit is described as a list of steps walked by a "turtle" on a tile grid (1 tile = 1 model unit of the kit):
 //   { s: n }                   straight of n tiles (made of roadStraightLong / roadStraight)
-//   { start: true }            the start/finish gantry piece (roadStart, 2 tiles long)
+//   { start: true }            the start/finish piece (roadStartPositions: flat straight with the grid painted on, 2 tiles long)
 //   { c: 'L' | 'R', size }     90 degree corner, size = 'small' | 'large' | 'larger' (centre-line radius 0.5 / 1.5 / 2.5 tiles)
 //
 // Piece geometry (measured from the GLB bounds, see CREDITS.md notes):
 //   - every road piece is exactly its tile footprint (straight 1x1 or 1x2, corner (r+0.5) square), road is 1 tile wide;
-//   - a corner model connects its south edge to its east edge (road centre 0.5 tile in from the outer edge);
-//   - roadStart is 0.26 tile wider than its tile (gantry post), so its bounds centre is shifted by -0.13 tile in x.
+//   - a corner model connects its south edge to its east edge (road centre 0.5 tile in from the outer edge).
+//   (roadStart, the gantry version, is not used: its raised kerbs and post do not line up with the flat pieces.)
 //
 // Output (island-local world units, x east, z south): model placements, the closed centre-line polygon, and a
 // converter from circuit tile coordinates to island-local coordinates (used to place grandstands, pits ...).
@@ -44,7 +44,7 @@ export function buildCircuit({ tile, start = [0, 0], heading = 1, steps }) {
       const yaw = h % 2 ? 90 : 0;
       let at = 0; // tiles already laid
       if (st.start) {
-        pieces.push({ m: 'racing/roadStart', cx: p[0] + v[0], cz: p[1] + v[1], r: yaw, start: true });
+        pieces.push({ m: 'racing/roadStartPositions', cx: p[0] + v[0], cz: p[1] + v[1], r: yaw });
         at = 2;
         n = 2;
       }
@@ -107,14 +107,8 @@ export function buildCircuit({ tile, start = [0, 0], heading = 1, steps }) {
   const oz = (Math.min(...zs) + Math.max(...zs)) / 2;
   const tileToLocal = (tx, tz) => [(tx - ox) * tile, (tz - oz) * tile];
 
-  // roadStart bounds are 0.26 tile wider than its tile: model-space offset of the tile centre from the bounds centre
   const models = pieces.map((pc) => {
-    let [x, z] = tileToLocal(pc.cx, pc.cz);
-    if (pc.start) {
-      const [dx, dz] = rot([-0.13 * tile, 0], pc.r);
-      x -= dx;
-      z -= dz;
-    }
+    const [x, z] = tileToLocal(pc.cx, pc.cz);
     return { m: pc.m, x: +x.toFixed(3), z: +z.toFixed(3), r: pc.r };
   });
   const path = line.map(([tx, tz]) => tileToLocal(tx, tz).map((n) => +n.toFixed(3)));
