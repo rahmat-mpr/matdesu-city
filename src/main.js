@@ -301,10 +301,14 @@ const hotspots = islands.map((isl) => {
   const el = document.createElement('button');
   el.className = 'hotspot';
   el.type = 'button';
-  el.setAttribute('aria-label', isl.name);
+  el.setAttribute('aria-label', `${isl.name}: ${isl.caption}`);
   el.innerHTML = `<span class="bob"><span class="icon">${isl.theme.emoji}</span><span class="check" aria-hidden="true">&#x2713;</span></span><span class="label"></span>`;
   el.classList.toggle('visited', quest.has(isl.id));
-  el.querySelector('.label').textContent = isl.name;
+  // always-visible label: name + what is on the island (caption, project count)
+  const n = isl.projects.length + isl.archive.length;
+  const label = el.querySelector('.label');
+  label.append(Object.assign(document.createElement('b'), { textContent: isl.name }));
+  label.append(Object.assign(document.createElement('small'), { textContent: [isl.caption, n && `${n} project${n > 1 ? 's' : ''}`].filter(Boolean).join(' · ') }));
   el.addEventListener('click', () => openIsland(isl));
   hotspotLayer.appendChild(el);
   const anchor = new THREE.Vector3(isl.position[0] + isl.hotspot[0], isl.hotspot[1], isl.position[1] + isl.hotspot[2]);

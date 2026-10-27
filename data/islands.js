@@ -78,6 +78,7 @@ const nsrTrim = nsr.path
 export const islands = [
   {
     id: 'town-square',
+    caption: 'About me', // shown under the name on the map icon
     name: 'Town Square',
     description:
       'Welcome! I am Rahmat Maulana Putra Rianto, a Unity game programmer. This is the hub of my portfolio.',
@@ -109,6 +110,7 @@ export const islands = [
   },
   {
     id: 'yes2games-circuit',
+    caption: 'Featured · NSR racing game',
     name: 'Yes2Games Circuit',
     description: 'Featured project: NSR – Nitro Street Racing, released on Google Play and Poki.',
     featured: true,
@@ -156,6 +158,7 @@ export const islands = [
   },
   {
     id: 'dfactory-plaza',
+    caption: 'LED and touch installations',
     name: 'DFactory Plaza',
     description: 'Interactive LED and touchscreen installations built at DFactory Visual.',
     position: [20.5, -17],
@@ -187,6 +190,7 @@ export const islands = [
   },
   {
     id: 'steam-arcade',
+    caption: 'Steam games',
     name: 'Steam Arcade',
     description: 'Two Steam games I worked on as a Unity programmer.',
     position: [26, 0],
@@ -231,6 +235,7 @@ export const islands = [
   },
   {
     id: 'ar-vr-lab',
+    caption: 'AR and VR apps',
     name: 'AR/VR Lab',
     description: 'AR and VR projects for training, education and tours.',
     position: [-19.5, -17],
@@ -285,6 +290,7 @@ export const islands = [
   },
   {
     id: 'indie-street',
+    caption: 'Mobile and indie games',
     name: 'Indie Street',
     description: 'Action, brawler, space shooter and visual novel games.',
     position: [18.5, 18.5],
@@ -331,6 +337,7 @@ export const islands = [
   },
   {
     id: 'post-office',
+    caption: 'Contact',
     name: 'Post Office',
     description: 'Get in touch: contact details, LinkedIn and my classic portfolio.',
     position: [0, 25],
@@ -377,6 +384,7 @@ export const islands = [
   },
   {
     id: 'animation-studio',
+    caption: '2D animation',
     name: 'Animation Studio',
     description: 'Spine 2D character animation, plus early game work.',
     position: [-26, 0],
@@ -421,6 +429,7 @@ export const islands = [
   },
   {
     id: 'pens-campus',
+    caption: 'Education',
     name: 'PENS Campus',
     description: 'Where I studied game technology, and a Gameseed 2023 grand finalist.',
     position: [-18.5, 18.5],
