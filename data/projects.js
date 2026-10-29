@@ -61,8 +61,8 @@ export const sections = {
 //     e.g. video: { type: 'youtube', src: 'https://www.youtube.com/embed/VIDEO_ID' }
 //          video: { type: 'mp4', src: 'assets/video/demo.mp4' }
 //   previews: [{ title, drive }]
-//     Animation previews hosted on Google Drive (file id, shared "Anyone with the link"). The detail shows one at a time
-//     in a panel with previous / next buttons; only the shown GIF is loaded.
+//     GIF / video previews hosted on Google Drive (file id, shared "Anyone with the link"). Shown one at a time in a
+//     square panel with previous / next buttons (no buttons for a single preview); only the shown file is loaded.
 //   play: { src, note?, aspect? }
 //     A WebGL build. The detail view shows a "Play" button that opens a fullscreen overlay with a lazy iframe.
 //     e.g. play: { src: 'games/nsr/index.html', note: 'Runs best on desktop', aspect: '16 / 9' }
@@ -250,9 +250,13 @@ export const projects = {
     image: img('image24'),
     imageAlt: 'Solar panel VR training scene',
     description:
-      'VR training for photovoltaic troubleshooting, used by employees. I built the scenarios, scene setup and training flow. The build is private under the client agreement.',
+      'VR training for photovoltaic troubleshooting, used by employees. I built the scenarios, scene setup and training flow. The build is private under the client agreement; the clips show the training.',
     tags: ['VR', 'Training'],
-    links: [{ label: 'Preview', url: 'http://bit.ly/37xRt0L' }],
+    previews: [
+      { title: 'Training clip', drive: '1FQ3F8PHKJPsnKT1y2F-FVlF71QugsCd8' },
+      { title: 'Training clip', drive: '1UG5hHOQ332RuPTKTvYLDRikb756Migbo' },
+    ],
+    links: [],
   },
   'petro-360': {
     id: 'petro-360',
@@ -342,42 +346,106 @@ export const projects = {
     tags: ['3D animation', 'Game design'],
     links: [{ label: 'itch.io', url: 'https://rahadianrayhan.itch.io/distance' }],
   },
-};
-
-// Compact "More projects" entries. `note` mirrors the classic site's one-line description and credit.
-export const archive = {
-  'the-lost-lamb': {
-    title: 'The Lost Lamb',
-    note: 'Hyper-casual gameplay development · Vizard Tales',
-    links: [{ label: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.VizardTales.TheLostLamb' }],
-  },
   'ar-name-card': {
+    id: 'ar-name-card',
     title: 'AR Name Card',
-    note: 'Marker AR that shows the company mascot · TicTech',
+    role: 'Programmer',
+    studio: 'TicTech Studio',
+    blurb: 'Marker AR that brings the company mascot out of a name card.',
+    image: img('ar-namecard-1'),
+    imageAlt: 'AR mascot standing on a scanned name card',
+    gallery: [{ src: img('ar-namecard-1'), alt: 'AR mascot standing on a scanned name card' }],
+    description:
+      'Marker-based AR that shows the company mascot on top of a name card. I wrote the AR code, set up the marker, mapped the scene, built the scenario and coded the mascot animation.',
+    tags: ['AR', 'Marker'],
     links: [{ label: 'Open', url: 'https://bit.ly/AR_NameCard' }],
   },
   senalapan: {
+    id: 'senalapan',
     title: 'SENALAPAN',
-    note: 'Markerless AR machine operating instructions · TicTech',
+    role: 'Programmer',
+    studio: 'TicTech Studio',
+    blurb: 'Markerless AR instructions for an ultrasonic mold cleaning machine.',
+    image: img('senalapan-1'),
+    imageAlt: 'AR step "remove the filter tube" over the cleaning machine',
+    gallery: [{ src: img('senalapan-1'), alt: 'AR step "remove the filter tube" over the cleaning machine' }],
+    description:
+      'Markerless AR that walks operators through the working procedure of an ultrasonic mold cleaning machine, step by step. I built the scenarios, imported the assets, mapped the scene and wrote the flow the client asked for.',
+    tags: ['AR', 'Markerless', 'Training'],
     links: [{ label: 'Open', url: 'http://bit.ly/2NJUJzi' }],
   },
   'brodo-shoes': {
+    id: 'brodo-shoes',
     title: 'Brodo Shoes',
-    note: 'AR Instagram filter with Spark AR · TicTech',
-    links: [{ label: 'Preview', url: 'http://drive.google.com/file/d/10hHfNWR1Uj--c_Ue5Ds3hv4k7kh9tL8V/view' }],
+    role: 'Main Programmer',
+    studio: 'TicTech Studio',
+    blurb: 'AR Instagram filter that shows Brodo shoes.',
+    image: img('brodo-1'),
+    imageAlt: 'Instagram filter showing a Brodo shoe above the user',
+    previews: [{ title: 'Instagram filter preview', drive: '10hHfNWR1Uj--c_Ue5Ds3hv4k7kh9tL8V' }],
+    description:
+      'Markerless AR and the "Which Brodo Style Are You" Instagram filter showcasing Brodo shoes, built in Spark AR Studio. The build is not public because of the client agreement; the video shows the filter.',
+    tags: ['Spark AR', 'Instagram filter'],
+    links: [],
   },
   'ar-foundation': {
+    id: 'ar-foundation',
     title: 'AR Foundation showcases',
-    note: 'Code and 3D assets · PT Bersama Kreatif',
+    role: 'Full-stack developer',
+    studio: 'PT Bersama Kreatif Teknologi',
+    blurb: 'AR tests: a 3D house, COVID-19 education and a lobster pond.',
+    image: img('arf-house-1'),
+    imageAlt: '3D house placed in AR',
+    gallery: [
+      { src: img('arf-house-1'), alt: '3D house placed in AR' },
+      { src: img('arf-house-2'), alt: 'Inside the 3D house in AR' },
+      { src: img('arf-covid-1'), alt: 'COVID-19 education model in AR' },
+      { src: img('arf-lobster-1'), alt: 'Tarpaulin lobster pond in AR' },
+    ],
+    description:
+      'AR tests built with Unity AR Foundation: a 3D house property showcase, a 3D COVID-19 education app and a tarpaulin pond for lobster cultivation. I wrote the AR code and made the 3D assets.',
+    tags: ['AR Foundation', '3D assets'],
     links: [
       { label: '3D House', url: 'https://bit.ly/3fDQ7EW' },
       { label: 'COVID-19 Education', url: 'https://bit.ly/3f8WVM1' },
       { label: 'Lobster Pond', url: 'https://bit.ly/3bIQEEA' },
     ],
   },
+  'the-lost-lamb': {
+    id: 'the-lost-lamb',
+    title: 'The Lost Lamb',
+    role: 'Gameplay Programmer',
+    studio: 'Vizard Tales',
+    blurb: 'Hyper-casual game: save the lamb from lava with bricks.',
+    image: img('lostlamb-1'),
+    imageAlt: 'The Lost Lamb gameplay',
+    gallery: [
+      { src: img('lostlamb-1'), alt: 'The Lost Lamb gameplay' },
+      { src: img('lostlamb-2'), alt: 'The Lost Lamb level with lava and bricks' },
+    ],
+    description:
+      'Hyper-casual game where players drop bricks to save a lamb from lava, without hitting the lamb. I worked on gameplay development for Vizard Tales. No longer listed on Google Play.',
+    tags: ['Hyper-casual', 'Mobile'],
+    links: [],
+  },
   'mojiken-vn': {
+    id: 'mojiken-vn',
     title: 'Mojiken Studio visual novels',
-    note: 'Scene flow and tweening · Pixelesthe',
+    role: 'Programmer',
+    studio: 'Pixelesthe Studio',
+    blurb: 'Sofi and the Red Balloon, Joy and the Pitcher, The Goose and the Golden Eggs.',
+    image: img('mojiken-sofi-1'),
+    imageAlt: 'Sofi and the Red Balloon scene',
+    gallery: [
+      { src: img('mojiken-sofi-1'), alt: 'Sofi and the Red Balloon scene' },
+      { src: img('mojiken-sofi-2'), alt: 'Sofi and the Red Balloon scene' },
+      { src: img('mojiken-joy-1'), alt: 'Joy and the Pitcher scene' },
+      { src: img('mojiken-joy-2'), alt: 'Joy and the Pitcher scene' },
+      { src: img('mojiken-goose-1'), alt: 'The Goose and the Golden Eggs scene' },
+      { src: img('mojiken-goose-2'), alt: 'The Goose and the Golden Eggs scene' },
+    ],
+    description: 'Three visual novels by Mojiken Studio. I built the scenario flow between scenes and the tweening animations.',
+    tags: ['Visual novel', 'Tweening'],
     links: [
       { label: 'Sofi and the Red Balloon', url: 'http://bit.ly/3dzbs30' },
       { label: 'Joy and the Pitcher', url: 'http://bit.ly/3btWtVE' },
@@ -385,8 +453,21 @@ export const archive = {
     ],
   },
   yumi: {
+    id: 'yumi',
     title: 'Yumi',
-    note: 'Educational alphabet and drawing game, all game code and 2D animation · Pixelesthe',
+    role: 'Programmer · 2D Animator',
+    studio: 'Pixelesthe Studio',
+    blurb: 'Educational game that teaches the alphabet through drawing.',
+    image: img('yumi-1'),
+    imageAlt: 'Yumi alphabet drawing screen',
+    gallery: [
+      { src: img('yumi-1'), alt: 'Yumi alphabet drawing screen' },
+      { src: img('yumi-2'), alt: 'Yumi letter tracing screen' },
+    ],
+    description:
+      "Yumi stands for \"Yuk Menulis\" (Let's write): an educational game that introduces reading the alphabet mixed with drawing. My first client project: I wrote all of the game code, including the drawing code and tweening, and some of the 2D animation.",
+    tags: ['Education', '2D animation'],
     links: [{ label: 'Open', url: 'http://bit.ly/3qCSQ67' }],
   },
 };
+

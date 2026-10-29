@@ -1,5 +1,5 @@
 // Card rendering, quest badges and play overlay. DOM only; no three.js here.
-import { profile, experience, projects, archive, sections, contact } from '../data/projects.js';
+import { profile, experience, projects, sections, contact } from '../data/projects.js';
 
 const STORE_KEY = 'matdesu-city-visited-v1';
 
@@ -115,23 +115,6 @@ export function createCardUI({ islands, quest, els, play }) {
     return [p.role, p.studio, p.period].filter(Boolean).join(' · ');
   }
 
-  function archiveList(ids) {
-    return h(
-      'ul',
-      { class: 'archive' },
-      ids.map((id) => {
-        const a = archive[id];
-        return h(
-          'li',
-          null,
-          h('b', { text: a.title }),
-          h('span', { class: 'note', text: a.note }),
-          h('span', { class: 'alinks' }, a.links.map((l) => extLink(l)))
-        );
-      })
-    );
-  }
-
   function facts(list) {
     return h(
       'div',
@@ -220,7 +203,7 @@ export function createCardUI({ islands, quest, els, play }) {
     );
   }
 
-  // island card: every project fully expanded, one after another (no list -> detail step), archive last
+  // island card: every project fully expanded, one after another (no list -> detail step)
   function renderList() {
     dropMedia();
     content.replaceChildren();
@@ -243,7 +226,6 @@ export function createCardUI({ islands, quest, els, play }) {
       );
     }
     content.append(...list.map(projectSection));
-    if (isl.archive?.length) content.append(h('h4', { class: 'sect', text: 'More projects' }), archiveList(isl.archive));
     scroll.scrollTop = 0;
   }
 
@@ -261,7 +243,7 @@ export function createCardUI({ islands, quest, els, play }) {
     });
   }
 
-  // Drive GIF previews, one at a time: ‹ › step through the list; only the shown GIF is loaded (they are large)
+  // Drive GIF / video previews, one at a time: ‹ › step through the list; only the shown file is loaded (they are large)
   function previewPanel(list, titleText) {
     let i = 0;
     const frame = h('iframe', { allow: 'autoplay', loading: 'lazy' });
@@ -274,6 +256,7 @@ export function createCardUI({ islands, quest, els, play }) {
     };
     const nav = (dir, label, text) => h('button', { type: 'button', class: 'pv-nav', 'aria-label': label, onclick: () => show(i + dir), text });
     show(0);
+    if (list.length === 1) return h('div', { class: 'media preview' }, frame);
     return h('div', { class: 'media preview' }, frame, h('div', { class: 'pv-bar' }, nav(-1, 'Previous animation', '‹'), cap, nav(1, 'Next animation', '›')));
   }
 
@@ -289,7 +272,7 @@ export function createCardUI({ islands, quest, els, play }) {
           h('div', null, h('h3', { text: p.title }), h('p', { class: 'credit', text: creditLine(p) }))
         ),
         h('div', { class: 'gallery', tabindex: '0', 'aria-label': `${p.title} screenshots` }, p.gallery.map((g) => h('img', { src: g.src, alt: g.alt, loading: 'lazy' }))),
-        h('p', { class: 'gallery-hint', text: 'Swipe or scroll for more screenshots' })
+        p.gallery.length > 1 ? h('p', { class: 'gallery-hint', text: 'Swipe or scroll for more screenshots' }) : null
       );
     } else if (p.previews?.length) {
       // animation previews take the hero image's place

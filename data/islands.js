@@ -1,5 +1,5 @@
 // Island data for MatDesu City. Data only: layout, theme, shape, model placements and which content each island shows.
-// Content lives in data/projects.js: `projects` are project ids, `archive` are archive ids, `section` picks an extra block
+// Content lives in data/projects.js: `projects` are project ids, `section` picks an extra block
 // ('profile' = Town Square profile, 'contact' = Post Office, else a key of `sections` in projects.js).
 //
 // Coordinates: x = east, z = south (towards the default camera), y = up. The sea surface is below y = 0;
@@ -92,7 +92,6 @@ export const islands = [
     hotspot: [0, 5.5, 0],
     section: 'profile',
     projects: [],
-    archive: [],
     models: [
       { m: 'nature/path_stoneCircle', x: 0, z: 0, s: 3.4 },
       { m: 'nature/statue_obelisk', x: 0, z: 0, s: 2.4 },
@@ -124,7 +123,6 @@ export const islands = [
     theme: { emoji: '\u{1F3CE}️' },
     hotspot: [0, 4.5, 0],
     projects: ['nsr'],
-    archive: [],
     models: [
       ...nsr.models,
       // race cars: ambient.js drives them round the circuit (these are only the start positions)
@@ -170,7 +168,6 @@ export const islands = [
     theme: { emoji: '\u{1F6CD}️' },
     hotspot: [0, 5.5, -1],
     projects: ['disney-piano', 'adelle-score-board'],
-    archive: [],
     models: [
       { m: 'commercial/building-f', x: -3.0, z: -3.0 },
       { m: 'commercial/building-a', x: -1.0, z: -3.0 },
@@ -209,7 +206,6 @@ export const islands = [
     theme: { emoji: '\u{1F579}️' },
     hotspot: [0, 5, -1],
     projects: ['magica-planta-botanica', 'school-beat', 'unrivaled-heroes'],
-    archive: [],
     models: [
       { m: 'commercial/building-j', x: -1.4, z: -2.8 },
       { m: 'commercial/building-g', x: 2.2, z: -3.0 },
@@ -261,8 +257,7 @@ export const islands = [
     biome: 'future',
     theme: { emoji: '\u{1F97D}' },
     hotspot: [0, 6, -1.5],
-    projects: ['ar-magazine', 'giz-solar-vr', 'petro-360'],
-    archive: ['ar-name-card', 'senalapan', 'brodo-shoes', 'ar-foundation'],
+    projects: ['ar-magazine', 'giz-solar-vr', 'petro-360', 'ar-name-card', 'senalapan', 'brodo-shoes', 'ar-foundation'],
     models: [
       { m: 'space/hangar_roundGlass', x: -2.4, z: -2.6, s: 0.9 },
       { m: 'space/satelliteDish_large', x: 0.4, z: -0.4, r: 30, s: 1.4 },
@@ -310,8 +305,7 @@ export const islands = [
     biome: 'autumn',
     theme: { emoji: '\u{1F3AE}' },
     hotspot: [0, 4, 0],
-    projects: ['haremking', 'g-project', 'worker-brawler'],
-    archive: ['the-lost-lamb'],
+    projects: ['haremking', 'g-project', 'worker-brawler', 'distance', 'the-lost-lamb'],
     models: [
       { m: 'suburban/building-type-a', x: -2.2, z: -3.0 },
       { m: 'suburban/building-type-c', x: 2.4, z: -3.0 },
@@ -360,7 +354,6 @@ export const islands = [
     hotspot: [0, 4, 0],
     section: 'contact',
     projects: [],
-    archive: [],
     models: [
       { m: 'suburban/building-type-m', x: 0, z: -1.2 },
       { m: 'nature/sign', x: -2.0, z: 2.4, r: 15, s: 2.2 },
@@ -404,8 +397,7 @@ export const islands = [
     biome: 'spring',
     theme: { emoji: '\u{1F3A8}' },
     hotspot: [0, 4, 0],
-    projects: ['chef-story', 'virgo-sparkling'],
-    archive: ['mojiken-vn', 'yumi'],
+    projects: ['chef-story', 'virgo-sparkling', 'mojiken-vn', 'yumi'],
     models: [
       { m: 'racing/tentLong', x: -0.6, z: -6.2 },
       { m: 'racing/tent', x: -2.8, z: -4.1, r: 60 },
@@ -454,8 +446,7 @@ export const islands = [
     theme: { emoji: '\u{1F393}' },
     hotspot: [0, 10.8, -1],
     section: 'pens',
-    projects: ['distance'],
-    archive: [],
+    projects: [],
     models: [
       { m: 'commercial/building-skyscraper-c', x: 0.8, z: -1.6 },
       { m: 'commercial/building-skyscraper-a', x: -0.4, z: -3.2 },

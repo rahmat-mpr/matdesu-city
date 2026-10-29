@@ -305,7 +305,7 @@ const hotspots = islands.map((isl) => {
   el.innerHTML = `<span class="bob"><span class="icon">${isl.theme.emoji}</span><span class="check" aria-hidden="true">&#x2713;</span></span><span class="label"></span>`;
   el.classList.toggle('visited', quest.has(isl.id));
   // always-visible label: name + what is on the island (caption, project count)
-  const n = isl.projects.length + isl.archive.length;
+  const n = isl.projects.length;
   const label = el.querySelector('.label');
   label.append(Object.assign(document.createElement('b'), { textContent: isl.name }));
   label.append(Object.assign(document.createElement('small'), { textContent: [isl.caption, n && `${n} project${n > 1 ? 's' : ''}`].filter(Boolean).join(' · ') }));

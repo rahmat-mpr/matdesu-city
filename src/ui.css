@@ -77,10 +77,6 @@
 .timeline b, .timeline small { display: block; }
 .timeline small { font-size: 14px; }
 
-.archive { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.archive li { font-size: 14px; line-height: 1.4; display: flex; flex-direction: column; gap: 1px; }
-.archive .note { color: #3d5a75; }
-.archive .alinks { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; }
 
 .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .badge { padding: 4px 10px; border-radius: 999px; background: #eef2f5; color: #55697b; font-size: 13px; font-weight: 700; }
