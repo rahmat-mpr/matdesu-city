@@ -87,7 +87,7 @@ export const projects = {
       { src: img('nsr-p2'), alt: 'Blue car drifting on a city highway' },
     ],
     description:
-      'Night-time street racing in an open city. Players race other drivers, customize and upgrade their cars, and build a racing career. Released on Google Play and on Poki for desktop and mobile browsers.',
+      'Night-time street racing in an open city. Players race other drivers, customize and upgrade their cars, and build a racing career. Released on Google Play, and on Poki and Yandex Games for desktop and mobile browsers.',
     tags: ['Racing', 'Unity · C#', 'Android · WebGL'],
     stats: [
       { value: '100K+', label: 'Google Play downloads' },
@@ -110,6 +110,7 @@ export const projects = {
         primary: true,
       },
       { label: 'Play on Poki', url: 'https://poki.com/id/g/nsr-street-car-racing' },
+      { label: 'Play on Yandex Games', url: 'https://yandex.com/games/app/nsr-street-car-racing-449371' },
     ],
   },
 
@@ -138,7 +139,8 @@ export const projects = {
     description:
       'Touchscreen web app for Adelle Jewellery events, running on iPad Air. I built the scoreboard simulation and the touch input that triggers promotional videos from an external host.',
     tags: ['Web app', 'iPad'],
-    links: [{ label: 'See project', url: 'https://interactive.dfactory.pro/' }],
+    previews: [{ title: 'Adelle Score Board video', drive: '1xHCfLA5umrYrwHCl2dQEYUYkhBRJhtw8' }],
+    links: [],
   },
 
   'magica-planta-botanica': {

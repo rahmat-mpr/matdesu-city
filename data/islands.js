@@ -111,7 +111,7 @@ export const islands = [
     id: 'yes2games-circuit',
     caption: 'Featured · NSR racing game',
     name: 'Yes2Games Circuit',
-    description: 'Featured project: NSR – Nitro Street Racing, released on Google Play and Poki.',
+    description: 'Featured project: NSR – Nitro Street Racing, released on Google Play, Poki and Yandex Games.',
     featured: true,
     position: [0, -26],
     radius: 12,

@@ -187,6 +187,11 @@ export function createFlights({ scene, camera, islands, islandRoots, cfg, reduce
       plane.root = root;
       plane.rest = { pos: obj.position.clone(), yaw: obj.rotation.y };
       obj.rotation.order = 'YXZ';
+      // the Kenney speeder's nose points -Z; turn the model once so +Z (the flight code's forward) is the nose
+      const nose = new THREE.Group();
+      nose.rotation.y = Math.PI;
+      nose.add(...obj.children);
+      obj.add(nose);
       return true;
     }
     return false;

@@ -170,7 +170,7 @@ export function createCardUI({ islands, quest, els, play }) {
     const buttons = h(
       'div',
       { class: 'links' },
-      h('a', { class: 'btn primary', href: `mailto:${contact.email}`, text: `Email ${contact.email}` }),
+      h('a', { class: 'btn primary', href: `mailto:${contact.email}`, target: '_blank', rel: 'noopener', text: `Email ${contact.email}` }),
       extLink({ label: 'CV (PDF)', url: contact.cv }, 'btn'),
       extLink({ label: 'LinkedIn', url: contact.linkedin }, 'btn'),
       extLink({ label: 'Classic portfolio ↗', url: contact.classic }, 'btn')
@@ -187,7 +187,7 @@ export function createCardUI({ islands, quest, els, play }) {
         h('b', { class: 'cc-title', text: '🏅 All badges collected!' }),
         h('h3', { text: profile.name }),
         h('p', { class: 'headline', text: profile.headline }),
-        h('p', null, h('a', { href: `mailto:${contact.email}`, text: contact.email })),
+        h('p', null, h('a', { href: `mailto:${contact.email}`, target: '_blank', rel: 'noopener', text: contact.email })),
         h('p', null, extLink({ label: 'linkedin.com/in/rahmatmpr', url: contact.linkedin }))
       );
     } else {
