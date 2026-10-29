@@ -64,7 +64,7 @@
 .pv-cap { flex: 1; min-width: 0; text-align: center; font-size: 13px; font-weight: 700; color: #3d5a75; }
 .pv-nav { flex: none; width: 38px; height: 38px; border: 2px solid #17324d; border-radius: 50%; background: #fff; color: #17324d; font: inherit; font-size: 22px; font-weight: 800; line-height: 1; cursor: pointer; }
 .pv-nav:hover, .pv-nav:focus-visible { background: #ffd54a; border-color: #ffd54a; }
-.media-ig iframe { aspect-ratio: auto; height: 640px; background: #fff; }   /* tall enough for IG's post chrome; the card scrolls */
+.media-ig iframe { aspect-ratio: auto; height: 640px; background: #fff; }   /* starting height; ui.js sets the post's real height */
 
 .profile-head { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
 .profile-head img { width: 92px; height: 92px; object-fit: cover; border-radius: 50%; border: 3px solid #ffd54a; flex: none; }

@@ -17,6 +17,19 @@ function h(tag, props, ...kids) {
   return el;
 }
 
+// Instagram embeds report their content height; size the iframe to it so the post never scrolls inside
+window.addEventListener('message', (e) => {
+  if (!/^https:\/\/www\.instagram\.com$/.test(e.origin)) return;
+  let msg;
+  try {
+    msg = JSON.parse(e.data);
+  } catch {
+    return;
+  }
+  if (msg.type !== 'MEASURE' || !msg.details?.height) return;
+  for (const f of document.querySelectorAll('iframe.ig')) if (f.contentWindow === e.source) f.style.height = `${msg.details.height}px`;
+});
+
 const extLink = (l, cls) => h('a', { href: l.url, target: '_blank', rel: 'noopener', class: cls }, l.label);
 
 // ---------- quest (islands visited this page load) ----------
@@ -221,7 +234,8 @@ export function createCardUI({ islands, quest, els, play }) {
       return h('video', { src: v.src, controls: '', playsinline: '', preload: 'none' });
     }
     return h('iframe', {
-      src: v.src,
+      src: v.type === 'instagram' ? `${v.src}/?cr=1&v=14` : v.src, // cr=1 makes Instagram post its height (handled at the top of this file)
+      scrolling: v.type === 'instagram' ? 'no' : null,
       title: `${titleText} video`,
       allow: 'autoplay; fullscreen; encrypted-media; picture-in-picture',
       allowfullscreen: '',
