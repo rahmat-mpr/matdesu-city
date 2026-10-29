@@ -195,7 +195,7 @@ export const projects = {
     description:
       'Visual novel with match-3. I built a Tinder-like matching system, a chat system that reads story scripts from text files with simple commands for writers, plus dress-up and gacha wheel modes.',
     tags: ['Mobile', 'Lua', 'Narrative tools'],
-    links: [{ label: 'Download', url: 'https://bit.ly/44rRIFz' }],
+    links: [{ label: 'Download', url: 'https://play.google.com/store/apps/details?id=haremking.id.co.digitalart' }],
   },
   'g-project': {
     id: 'g-project',
@@ -209,8 +209,8 @@ export const projects = {
       'Space arcade shooter and its survival sequel. I designed both games and built the game manager connecting gameplay, achievements, shop and sound across scenes.',
     tags: ['Mobile', 'Game design'],
     links: [
-      { label: 'G:Project', url: 'https://bit.ly/G_Project1' },
-      { label: 'G:Escape', url: 'https://bit.ly/G_Escape' },
+      { label: 'G:Project', url: 'https://play.google.com/store/apps/details?id=com.StrategyMax.GProject' },
+      { label: 'G:Escape', url: 'https://play.google.com/store/apps/details?id=com.StrategyMax.GEscape' },
     ],
   },
   'worker-brawler': {
@@ -226,7 +226,7 @@ export const projects = {
     tags: ['Photon', 'Multiplayer'],
     links: [
       { label: 'itch.io', url: 'https://ategonstd.itch.io/worker-brawler' },
-      { label: 'Animations', url: 'https://bit.ly/2QBe9be' },
+      { label: 'Animations', url: 'https://drive.google.com/drive/folders/17RNq-TgBAH_2XTHYb_tzwKmyC6FkYrcA' },
     ],
   },
 
@@ -241,7 +241,7 @@ export const projects = {
     description:
       "AR app that brings comic stories on the page to life with animated explanations. I built the AR scenarios, marker setup and scene flow to the client's requests.",
     tags: ['AR', 'Education'],
-    links: [{ label: 'Download', url: 'https://bit.ly/Klikuark' }],
+    links: [{ label: 'Download', url: 'https://play.google.com/store/apps/details?id=com.tictech.kelar' }],
   },
   'giz-solar-vr': {
     id: 'giz-solar-vr',
@@ -360,7 +360,7 @@ export const projects = {
     description:
       'Marker-based AR that shows the company mascot on top of a name card. I wrote the AR code, set up the marker, mapped the scene, built the scenario and coded the mascot animation.',
     tags: ['AR', 'Marker'],
-    links: [{ label: 'Open', url: 'https://bit.ly/AR_NameCard' }],
+    links: [{ label: 'Open', url: 'https://drive.google.com/drive/folders/10u8H_IJ9JLVX_KQYqLqAcNqX2wbrUoI3' }],
   },
   senalapan: {
     id: 'senalapan',
@@ -374,7 +374,7 @@ export const projects = {
     description:
       'Markerless AR that walks operators through the working procedure of an ultrasonic mold cleaning machine, step by step. I built the scenarios, imported the assets, mapped the scene and wrote the flow the client asked for.',
     tags: ['AR', 'Markerless', 'Training'],
-    links: [{ label: 'Open', url: 'http://bit.ly/2NJUJzi' }],
+    links: [{ label: 'Open', url: 'https://drive.google.com/drive/folders/1vVtH7C6hpSgqclDTTdas59IxbTCWHlKM' }],
   },
   'brodo-shoes': {
     id: 'brodo-shoes',
@@ -408,9 +408,9 @@ export const projects = {
       'AR tests built with Unity AR Foundation: a 3D house property showcase, a 3D COVID-19 education app and a tarpaulin pond for lobster cultivation. I wrote the AR code and made the 3D assets.',
     tags: ['AR Foundation', '3D assets'],
     links: [
-      { label: '3D House', url: 'https://bit.ly/3fDQ7EW' },
-      { label: 'COVID-19 Education', url: 'https://bit.ly/3f8WVM1' },
-      { label: 'Lobster Pond', url: 'https://bit.ly/3bIQEEA' },
+      { label: '3D House', url: 'https://drive.google.com/file/d/1df07NaxaqPoT9WqPbV7LYa7BOV7NW8WB/view' },
+      { label: 'COVID-19 Education', url: 'https://drive.google.com/drive/folders/1JyAJBzUwv07JakGSj-COzNAHDKyL6Mca' },
+      { label: 'Lobster Pond', url: 'https://drive.google.com/drive/folders/1YkF6H-mgh0givsTfAe7uu6YhkzFIXxiK' },
     ],
   },
   'the-lost-lamb': {
@@ -449,9 +449,9 @@ export const projects = {
     description: 'Three visual novels by Mojiken Studio. I built the scenario flow between scenes and the tweening animations.',
     tags: ['Visual novel', 'Tweening'],
     links: [
-      { label: 'Sofi and the Red Balloon', url: 'http://bit.ly/3dzbs30' },
-      { label: 'Joy and the Pitcher', url: 'http://bit.ly/3btWtVE' },
-      { label: 'The Goose and the Golden Eggs', url: 'http://bit.ly/3pCmzL1' },
+      { label: 'Sofi and the Red Balloon', url: 'https://drive.google.com/drive/folders/1PHWv1j77-HMVMiEq5iYDrXp8iK82XHF2' },
+      { label: 'Joy and the Pitcher', url: 'https://drive.google.com/drive/folders/19LhT7iUlW1_n2n_3ds9SLcSeR2SNXxA0' },
+      { label: 'The Goose and the Golden Eggs', url: 'https://drive.google.com/drive/folders/1weqbOYHG26IjFZA7Docf2chRfrv2L4XA' },
     ],
   },
   yumi: {
@@ -469,7 +469,7 @@ export const projects = {
     description:
       "Yumi stands for \"Yuk Menulis\" (Let's write): an educational game that introduces reading the alphabet mixed with drawing. My first client project: I wrote all of the game code, including the drawing code and tweening, and some of the 2D animation.",
     tags: ['Education', '2D animation'],
-    links: [{ label: 'Open', url: 'http://bit.ly/3qCSQ67' }],
+    links: [{ label: 'Open', url: 'https://drive.google.com/drive/folders/1eWet7sdqx2xENK34VOGaM3K0O2eMVAHr' }],
   },
 };
 
