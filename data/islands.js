@@ -82,7 +82,8 @@ export const islands = [
     caption: 'About me', // shown under the name on the map icon
     name: 'Town Square',
     description:
-      'Welcome! I am Rahmat Maulana Putra Rianto, a Unity game programmer. This is the hub of my portfolio.',
+      'I am Rahmat Maulana Putra Rianto, a Unity game programmer. This is the hub of my portfolio.',
+    lead: 'Welcome!', // shown bold before the description
     position: [0, 0],
     radius: 7.5,
     seed: 0.3,

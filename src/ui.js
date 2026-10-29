@@ -119,7 +119,9 @@ export function createCardUI({ islands, quest, els, play }) {
     return h(
       'div',
       { class: 'facts' },
-      list.map((f) => h('div', null, h('h4', { text: f.title }), h('p', { text: f.text })))
+      list.map((f) =>
+        h('div', null, h('h4', { text: f.title }), f.chips ? h('div', { class: 'chips' }, f.text.split(/\s*[·,]\s*/).map((t) => h('span', { text: t }))) : h('p', { text: f.text }))
+      )
     );
   }
 
@@ -136,7 +138,7 @@ export function createCardUI({ islands, quest, els, play }) {
       h('p', { text: profile.intro }),
       h('div', { class: 'links' }, extLink({ label: 'Download CV (PDF)', url: contact.cv }, 'btn primary')),
       facts([
-        { title: 'Skills', text: profile.skills },
+        { title: 'Skills', text: profile.skills, chips: true },
         { title: 'QA', text: profile.qa },
       ]),
       h('h4', { class: 'sect', text: 'Experience' }),
@@ -209,7 +211,7 @@ export function createCardUI({ islands, quest, els, play }) {
     content.replaceChildren();
     const isl = current;
     title.textContent = isl.name;
-    desc.textContent = isl.description;
+    desc.replaceChildren(...(isl.lead ? [h('b', { text: isl.lead }), ' '] : []), isl.description);
     if (isl.section === 'profile') content.append(profileBlock());
     else if (isl.section === 'contact') content.append(contactBlock());
     else if (isl.section && sections[isl.section]) content.append(facts(sections[isl.section].facts));

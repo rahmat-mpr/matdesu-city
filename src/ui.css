@@ -24,7 +24,7 @@
 #card h4 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: #3d5a75; }
 #card h4.sect { margin: 20px 0 8px; padding-top: 12px; border-top: 2px solid #e8f4fb; }
 #card a { color: #0b66b2; font-weight: 700; }
-#card .headline { font-weight: 700; margin-bottom: 2px; }
+#card .headline { margin-bottom: 2px; }
 #card .loc, #card .credit, #card small { color: #3d5a75; }
 #card .credit { margin-bottom: 10px; }
 #card-desc { color: #2b4964; }
@@ -71,6 +71,8 @@
 .profile-head p { margin: 0; }
 .facts div { margin-bottom: 10px; }
 .facts p { margin: 0; font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { padding: 4px 11px; border: 2px solid #e1eef6; border-radius: 999px; background: #f6fbff; font-size: 13px; font-weight: 700; }
 .timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .timeline li { display: flex; gap: 10px; font-size: 14px; line-height: 1.35; }
 .timeline .when { flex: none; width: 112px; color: #3d5a75; font-weight: 700; }
