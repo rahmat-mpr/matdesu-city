@@ -311,7 +311,7 @@ export const islands = [
     theme: { emoji: '\u{1F3AE}' },
     hotspot: [0, 4, 0],
     projects: ['haremking', 'g-project', 'worker-brawler'],
-    archive: ['the-lost-lamb', 'food-tycoon'],
+    archive: ['the-lost-lamb'],
     models: [
       { m: 'suburban/building-type-a', x: -2.2, z: -3.0 },
       { m: 'suburban/building-type-c', x: 2.4, z: -3.0 },

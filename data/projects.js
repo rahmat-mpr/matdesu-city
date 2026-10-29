@@ -315,11 +315,6 @@ export const archive = {
     note: 'Hyper-casual gameplay development · Vizard Tales',
     links: [{ label: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.VizardTales.TheLostLamb' }],
   },
-  'food-tycoon': {
-    title: 'Food Tycoon Nusantara',
-    note: 'Core gameplay · Mobile',
-    links: [{ label: 'Open', url: 'https://drive.google.com/file/d/1pr1EJ_IRzzMnwODNirqz5cZgjmsDS1N6/view' }],
-  },
   'ar-name-card': {
     title: 'AR Name Card',
     note: 'Marker AR that shows the company mascot · TicTech',
