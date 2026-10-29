@@ -148,10 +148,10 @@ export const projects = {
     title: 'Product Display',
     role: 'Programmer',
     studio: 'DFactory Visual',
-    blurb: 'Interactive 3D product viewer for a portrait touchscreen kiosk.',
+    blurb: 'Interactive 3D product showcase on a large LED screen.',
     description:
-      'Interactive 3D product showcase for a portrait touchscreen kiosk, demoed with a La Roche-Posay serum. Shoppers rotate and inspect the bottle in real time, switch its color, open the cap to reveal the dropper, or let Auto mode spin the product as an attract loop between visitors.',
-    tags: ['3D viewer', 'Touchscreen', 'Retail'],
+      'Interactive 3D product showcase on a large LED screen, built to show products to customers. Visitors rotate and inspect the product in real time, switch its color, open the cap to show what is inside, or let Auto mode spin it as an attract loop between visitors.',
+    tags: ['3D viewer', 'LED screen', 'Retail'],
     previews: [{ title: 'Product Display demo', drive: '1T3pnvsFD44aWfBhbAyiBnBL5Ioo0JUDe' }],
     links: [],
   },

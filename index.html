@@ -47,13 +47,31 @@
   <div id="app"></div>
   <div id="hotspots"></div>
   <div id="title">MatDesu City</div>
+  <aside id="quests">
+    <button id="quests-toggle" type="button" aria-expanded="true" aria-controls="quest-list">📜 Quests <span id="quest-count">0/9</span></button>
+    <ol id="quest-list"></ol>
+  </aside>
   <div id="hud">
-    <button id="quest-pill" type="button" aria-label="Badges collected">🏅 <span id="quest-count">0/9</span></button>
     <a id="classic-link" href="https://rahmat-mpr.github.io/" target="_blank" rel="noopener">Classic portfolio ↗</a>
   </div>
   <div id="toast" role="status"></div>
-  <div id="hint">Drag to explore &middot; Scroll/pinch to zoom &middot; Tap an icon &middot; Collect all 9 badges</div>
+  <div id="hint">Drag to explore &middot; Scroll/pinch to zoom &middot; Tap an icon &middot; Finish the quests</div>
   <div id="loading">Loading models&hellip;</div>
+
+  <div id="finger" hidden aria-hidden="true"><span>👆</span></div>
+  <div id="tutorial" hidden><p role="status">Each icon is an island with part of my work. Let's start at <b>Town Square</b>&hellip;</p></div>
+  <div id="welcome" role="dialog" aria-labelledby="welcome-title">
+    <div class="welcome-box">
+      <p class="welcome-wave" aria-hidden="true">&#x1F44B;</p>
+      <h2 id="welcome-title">Welcome to MatDesu City!</h2>
+      <p>Hi, I'm <b>Rahmat</b>, a Unity game programmer. Each island in this little city holds part of my work: games, AR/VR, LED installations and more.</p>
+      <p class="welcome-how">Tap an island icon to see its projects &middot; Drag to move &middot; Scroll or pinch to zoom</p>
+      <div class="welcome-actions">
+        <button id="welcome-start" type="button">Start exploring</button>
+        <a href="assets/cv/Rahmat-Maulana-Putra-Rianto-CV.pdf" target="_blank" rel="noopener">Download CV (PDF)</a>
+      </div>
+    </div>
+  </div>
 
   <div id="card" role="dialog" aria-labelledby="card-title">
     <button id="card-close" aria-label="Close">&#x2715;</button>

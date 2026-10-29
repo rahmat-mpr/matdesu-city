@@ -78,6 +78,7 @@ const nsrTrim = nsr.path
 export const islands = [
   {
     id: 'town-square',
+    quest: 'Meet Rahmat at Town Square', // quest log entry
     caption: 'About me', // shown under the name on the map icon
     name: 'Town Square',
     description:
@@ -109,6 +110,7 @@ export const islands = [
   },
   {
     id: 'yes2games-circuit',
+    quest: 'Race in the featured NSR game',
     caption: 'Featured · NSR racing game',
     name: 'Yes2Games Circuit',
     description: 'Featured project: NSR – Nitro Street Racing, released on Google Play, Poki and Yandex Games.',
@@ -156,6 +158,7 @@ export const islands = [
   },
   {
     id: 'dfactory-plaza',
+    quest: 'See the LED installations',
     caption: 'LED and touch installations',
     name: 'DFactory Plaza',
     description: 'Interactive LED and touchscreen installations built at DFactory Visual.',
@@ -187,6 +190,7 @@ export const islands = [
   },
   {
     id: 'steam-arcade',
+    quest: 'Browse the Steam games',
     caption: 'Steam games',
     name: 'Steam Arcade',
     description: 'Three Steam games I worked on as a Unity programmer.',
@@ -231,6 +235,7 @@ export const islands = [
   },
   {
     id: 'ar-vr-lab',
+    quest: 'Try the AR and VR apps',
     caption: 'AR and VR apps',
     name: 'AR/VR Lab',
     description: 'AR and VR projects for training, education and tours.',
@@ -285,6 +290,7 @@ export const islands = [
   },
   {
     id: 'indie-street',
+    quest: 'Check out the mobile and indie games',
     caption: 'Mobile and indie games',
     name: 'Indie Street',
     description: 'Action, brawler, space shooter and visual novel games.',
@@ -331,6 +337,7 @@ export const islands = [
   },
   {
     id: 'post-office',
+    quest: 'Get in touch at the Post Office',
     caption: 'Contact',
     name: 'Post Office',
     description: 'Get in touch: contact details, LinkedIn and my classic portfolio.',
@@ -377,6 +384,7 @@ export const islands = [
   },
   {
     id: 'animation-studio',
+    quest: 'Watch the 2D animations',
     caption: '2D animation',
     name: 'Animation Studio',
     description: 'Spine 2D character animation, plus early game work.',
@@ -421,6 +429,7 @@ export const islands = [
   },
   {
     id: 'pens-campus',
+    quest: 'Visit the campus',
     caption: 'Education',
     name: 'PENS Campus',
     description: 'Where I studied game technology, and a Gameseed 2023 grand finalist.',

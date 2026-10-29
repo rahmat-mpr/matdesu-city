@@ -259,25 +259,41 @@ const quest = createQuest(islands.map((i) => i.id));
 const questCount = $('quest-count');
 const toast = $('toast');
 let toastTimer = 0;
-function showToast(msg) {
+function showToast(msg, ms = 3500, low = false) {
   toast.textContent = msg;
+  toast.classList.toggle('low', low); // bottom of the screen, clear of the card's close button
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), ms);
 }
+const questToggle = $('quests-toggle');
+questToggle.setAttribute('aria-expanded', String(window.innerWidth >= 700)); // collapsed on phones
+questToggle.addEventListener('click', () => questToggle.setAttribute('aria-expanded', String(questToggle.getAttribute('aria-expanded') !== 'true')));
+// quest log: Post Office last, click flies to the island and opens its card
+const questRows = [...islands]
+  .sort((a, b) => (a.id === 'post-office') - (b.id === 'post-office'))
+  .map((isl) => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.innerHTML = '<span class="box" aria-hidden="true"></span>';
+    btn.append(isl.quest);
+    btn.addEventListener('click', () => goToIsland(isl));
+    li.append(btn);
+    $('quest-list').append(li);
+    return { li, id: isl.id };
+  });
 const updateQuestHud = () => {
   questCount.textContent = `${quest.count()}/${quest.total}`;
-  $('quest-pill').title = `${quest.count()} of ${quest.total} islands visited`;
+  let next = true;
+  for (const r of questRows) {
+    const done = quest.has(r.id);
+    r.li.classList.toggle('done', done);
+    r.li.classList.toggle('next', !done && next);
+    if (!done) next = false;
+  }
 };
 updateQuestHud();
-$('quest-pill').addEventListener('click', () => {
-  const left = islands.filter((i) => !quest.has(i.id)).map((i) => i.name);
-  showToast(
-    left.length
-      ? `${quest.count()}/${quest.total} islands visited. Still to visit: ${left.join(', ')}.`
-      : 'All badges collected! Visit the Post Office for a surprise.'
-  );
-});
 
 const play = createPlayOverlay({
   onOpen: () => {
@@ -339,6 +355,8 @@ function updateHotspots() {
 let fly = null; // { t0, dur, fromT, toT, fromP, toP, done }
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+const waitUntil = (ok) => new Promise((res) => { const id = setInterval(() => ok() && (clearInterval(id), res()), 100); });
+
 function flyTo(toT, toP, dur, done) {
   fly = { t0: performance.now(), dur: dur * 1000, fromT: controls.target.clone(), toT, fromP: camera.position.clone(), toP, done };
   controls.enabled = false;
@@ -361,7 +379,7 @@ function stepFly(now) {
 let selected = null;
 let saved = null; // camera state to return to
 
-function openIsland(isl) {
+function openIsland(isl, { visit = true } = {}) {
   if (selected || fly) return;
   selected = isl;
   saved = { target: controls.target.clone(), pos: camera.position.clone() };
@@ -373,14 +391,21 @@ function openIsland(isl) {
   const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0));
   const target = new THREE.Vector3(isl.position[0], 1, isl.position[1]);
   // keep the island clear of the card: left of centre on wide screens, above centre on narrow ones
-  if (window.innerWidth >= 700) target.addScaledVector(right, dist * 0.26);
+  if (window.innerWidth >= 700) target.addScaledVector(right, dist * 0.8 * (card.offsetWidth / window.innerWidth));
   else target.addScaledVector(fwd, -dist * 0.3);
   flyTo(target, target.clone().addScaledVector(dir, dist), 1.1, () => {
     if (selected !== isl) return;
-    quest.visit(isl.id); // opening a card counts as visiting
+    if (visit) quest.visit(isl.id); // opening a card counts as visiting
     cardUI.show(isl);
     card.classList.add('open');
   });
+}
+
+// open an island from anywhere, closing the current card first
+function goToIsland(isl) {
+  if (selected === isl) return;
+  if (selected) closeIsland();
+  waitUntil(() => !fly && !selected).then(() => openIsland(isl));
 }
 
 function closeIsland() {
@@ -399,10 +424,75 @@ $('card-close').addEventListener('click', closeIsland);
 quest.onChange((id) => {
   updateQuestHud();
   hotspots.find((hs) => hs.id === id)?.el.classList.add('visited');
-  if (quest.count() === quest.total && selected?.id !== 'post-office') showToast('All badges collected! Visit the Post Office for a surprise.');
+  if (quest.count() === quest.total && selected?.id !== 'post-office') showToast('All quests done! Visit the Post Office for a surprise.');
 });
+// welcome panel: closes on the button, a click outside the box or Escape
+const welcome = $('welcome');
+function closeWelcome() {
+  if (welcome.classList.contains('hide')) return false;
+  welcome.classList.add('hide');
+  setTimeout(() => welcome.remove(), 300);
+  runTutorial();
+  return true;
+}
+
+// tutorial: input is blocked while the camera opens Town Square for the visitor, then everything is free
+const tutorial = $('tutorial');
+// pointing hand: glides to an element (fingertip on its centre), optionally taps it
+const finger = $('finger');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function pointAt(el, tap = false) {
+  const r = el.getBoundingClientRect();
+  if (finger.hidden) {
+    finger.hidden = false;
+    finger.getBoundingClientRect(); // so the glide starts from where the hand was
+  }
+  finger.classList.remove('tap');
+  finger.style.transform = `translate(${r.left + r.width / 2}px, ${r.top + r.height / 2}px)`;
+  await sleep(1600); // glide (1.4s in CSS) plus a short rest
+  if (tap) {
+    finger.classList.add('tap');
+    await sleep(900);
+  }
+}
+
+async function runTutorial() {
+  const town = islands.find((i) => i.id === 'town-square');
+  const hs = hotspots.find((h) => h.id === town.id);
+  tutorial.hidden = false;
+  hs.el.classList.add('pulse');
+  await waitUntil(() => !fly); // intro fly-in may still be running
+  await sleep(1800); // let the visitor read the bubble first
+  await pointAt(hs.el.querySelector('.icon'), true);
+  if (!selected) openIsland(town, { visit: false }); // the quest is ticked when the visitor closes this card
+  finger.hidden = true;
+  await waitUntil(() => card.classList.contains('open'));
+  hs.el.classList.remove('pulse');
+  tutorial.hidden = true;
+  await sleep(800); // card slide-in
+  pointAt($('card-close'));
+  showToast('This card is about me. Close it with ✕ when you are done reading.', 6000, true);
+  await waitUntil(() => !selected);
+  finger.hidden = true;
+  questToggle.setAttribute('aria-expanded', 'true');
+  quest.visit(town.id);
+  questRows.find((r) => r.id === town.id).li.classList.add('flash');
+  showToast('Quest complete! You are free to explore now: tap a quest to travel there, or tap any island.', 6000);
+  await sleep(1200);
+  await pointAt(document.querySelector('#quest-list .next button') ?? questToggle, true);
+  // the hand leaves on the visitor's first move or after a few seconds
+  const hide = () => (finger.hidden = true);
+  window.addEventListener('pointerdown', hide, { once: true });
+  setTimeout(hide, 2500);
+}
+$('welcome-start').addEventListener('click', closeWelcome);
+welcome.addEventListener('click', (e) => e.target === welcome && closeWelcome());
+$('welcome-start').focus();
+
 window.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
+  if (welcome.isConnected && closeWelcome()) return;
+  if (!tutorial.hidden) return;
   if (!cardUI.back()) closeIsland();
 });
 

@@ -1,8 +1,6 @@
 // Card rendering, quest badges and play overlay. DOM only; no three.js here.
 import { profile, experience, projects, sections, contact } from '../data/projects.js';
 
-const STORE_KEY = 'matdesu-city-visited-v1';
-
 // tiny DOM helper: h('div', { class: 'x', text: '..' }, child, 'text')
 function h(tag, props, ...kids) {
   const el = document.createElement(tag);
@@ -21,15 +19,9 @@ function h(tag, props, ...kids) {
 
 const extLink = (l, cls) => h('a', { href: l.url, target: '_blank', rel: 'noopener', class: cls }, l.label);
 
-// ---------- quest (visited islands) ----------
+// ---------- quest (islands visited this page load) ----------
 export function createQuest(ids) {
-  const visited = new Set();
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) for (const id of JSON.parse(raw)) if (ids.includes(id)) visited.add(id);
-  } catch (e) {
-    /* storage unavailable or corrupt: start fresh */
-  }
+  const visited = new Set(); // ponytail: not saved, every page load starts the quests fresh
   const listeners = [];
   return {
     total: ids.length,
@@ -38,11 +30,6 @@ export function createQuest(ids) {
     visit(id) {
       if (visited.has(id)) return false;
       visited.add(id);
-      try {
-        localStorage.setItem(STORE_KEY, JSON.stringify([...visited]));
-      } catch (e) {
-        /* works without storage */
-      }
       listeners.forEach((fn) => fn(id));
       return true;
     },
