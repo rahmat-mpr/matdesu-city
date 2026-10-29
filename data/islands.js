@@ -192,7 +192,7 @@ export const islands = [
     id: 'steam-arcade',
     caption: 'Steam games',
     name: 'Steam Arcade',
-    description: 'Two Steam games I worked on as a Unity programmer.',
+    description: 'Three Steam games I worked on as a Unity programmer.',
     position: [26, 0],
     radius: 6.2,
     seed: 4.1,
@@ -208,7 +208,7 @@ export const islands = [
     biome: 'summer',
     theme: { emoji: '\u{1F579}️' },
     hotspot: [0, 5, -1],
-    projects: ['magica-planta-botanica', 'school-beat'],
+    projects: ['magica-planta-botanica', 'school-beat', 'unrivaled-heroes'],
     archive: [],
     models: [
       { m: 'commercial/building-j', x: -1.4, z: -2.8 },
@@ -310,7 +310,7 @@ export const islands = [
     biome: 'autumn',
     theme: { emoji: '\u{1F3AE}' },
     hotspot: [0, 4, 0],
-    projects: ['unrivaled-heroes', 'haremking', 'g-project', 'worker-brawler'],
+    projects: ['haremking', 'g-project', 'worker-brawler'],
     archive: ['the-lost-lamb', 'food-tycoon'],
     models: [
       { m: 'suburban/building-type-a', x: -2.2, z: -3.0 },

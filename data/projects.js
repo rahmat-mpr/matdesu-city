@@ -175,8 +175,8 @@ export const projects = {
     imageAlt: 'Unrivaled Heroes key art',
     description:
       "2.5D side-scrolling beat 'em up set in Nusantara folklore. I built the top-down gameplay, migrated the project from Unreal to Unity, and moved gameplay from 2D to 3D with a 2.5D look.",
-    tags: ['Unreal → Unity', '2.5D'],
-    links: [{ label: 'Download', url: 'https://bit.ly/3sieKBm' }],
+    tags: ['Steam', 'Unreal → Unity', '2.5D'],
+    links: [{ label: 'Steam page', url: 'https://store.steampowered.com/app/2690830/Unrivaled_Heroes_25D_Brawler/' }],
   },
   haremking: {
     id: 'haremking',
