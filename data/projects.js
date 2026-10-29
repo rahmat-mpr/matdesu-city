@@ -86,7 +86,7 @@ export const projects = {
       { src: img('nsr-p2'), alt: 'Blue car drifting on a city highway' },
     ],
     description:
-      'Night-time street racing in an open city. Players race other drivers, customize and upgrade their cars, and build a racing career. Released on Google Play, and on Poki and Yandex Games for desktop and mobile browsers. I migrated the project from the Unity Built-in Render Pipeline to URP and wrote the shaders for the cars.',
+      'Night-time street racing in an open city. Players race other drivers, customize and upgrade their cars, and build a racing career. Released on Google Play, and on Poki and Yandex Games for desktop and mobile browsers. I migrated the project from the Unity Built-in Render Pipeline to URP and made the car shaders plus several other materials the game needed.',
     tags: ['Racing', 'Unity · C#', 'Android · WebGL'],
     stats: [
       { value: '100K+', label: 'Google Play downloads' },
