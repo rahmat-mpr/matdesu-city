@@ -48,7 +48,6 @@ export const sections = {
         title: 'Education',
         text: 'Bachelor of Applied Science in Game Technology, Politeknik Elektronika Negeri Surabaya (2016 – 2023)',
       },
-      { title: 'Achievement', text: 'Grand Finalist, Gameseed 2023' },
       { title: 'Campus', text: 'Chief Lab Assistant, Game Technology (2018) · Lab Assistant, Game Technology · Sponsorship Division, Gubufest 2018 · Decoration Division, Janaka Festival PENS 2017' },
       { title: 'Teaching', text: 'Game Developer Trainer, SMA 1 Puri Mojokerto (Sep 2023 – Aug 2024)' },
     ],
@@ -205,8 +204,8 @@ export const projects = {
     image: img('image79'),
     imageAlt: 'Unrivaled Heroes key art',
     description:
-      "2.5D side-scrolling beat 'em up set in Nusantara folklore. I built the top-down gameplay, migrated the project from Unreal to Unity, and moved gameplay from 2D to 3D with a 2.5D look.",
-    tags: ['Steam', 'Unreal → Unity', '2.5D'],
+      "2.5D side-scrolling beat 'em up set in Nusantara folklore. I built the top-down gameplay, migrated the project from Unreal to Unity, and moved gameplay from 2D to 3D with a 2.5D look. The game was a Grand Finalist at Gameseed 2023.",
+    tags: ['Steam', 'Gameseed 2023 Grand Finalist', 'Unreal → Unity', '2.5D'],
     links: [{ label: 'Steam page', url: 'https://store.steampowered.com/app/2690830/Unrivaled_Heroes_25D_Brawler/' }],
   },
   haremking: {

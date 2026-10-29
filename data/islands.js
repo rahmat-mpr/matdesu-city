@@ -433,7 +433,7 @@ export const islands = [
     quest: 'Visit the campus',
     caption: 'Education',
     name: 'PENS Campus',
-    description: 'Where I studied game technology, and a Gameseed 2023 grand finalist.',
+    description: 'Where I studied game technology.',
     position: [-18.5, 18.5],
     radius: 6.3,
     seed: 8.6,
