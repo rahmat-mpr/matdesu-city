@@ -60,6 +60,9 @@ export const sections = {
 //     Shown in the detail view. The iframe/<video> is created when the detail opens and removed when it closes.
 //     e.g. video: { type: 'youtube', src: 'https://www.youtube.com/embed/VIDEO_ID' }
 //          video: { type: 'mp4', src: 'assets/video/demo.mp4' }
+//   previews: [{ title, drive }]
+//     Animation previews hosted on Google Drive (file id, shared "Anyone with the link"). The detail shows one at a time
+//     in a panel with previous / next buttons; only the shown GIF is loaded.
 //   play: { src, note?, aspect? }
 //     A WebGL build. The detail view shows a "Play" button that opens a fullscreen overlay with a lazy iframe.
 //     e.g. play: { src: 'games/nsr/index.html', note: 'Runs best on desktop', aspect: '16 / 9' }
@@ -269,27 +272,60 @@ export const projects = {
     id: 'chef-story',
     title: 'Chef Story: Cooking Game',
     role: '2D Animator',
-    studio: 'Freelance',
+    studio: 'Niji Games (freelance)',
     blurb: 'Spine 2D animation for customers and a motorbike-taxi driver.',
     image: img('image70'),
     imageAlt: 'Chibi customer character from Chef Story',
     fit: 'contain',
-    description: 'Animated customer girls, chibi customers and a chibi motorbike-taxi driver in Spine 2D.',
-    tags: ['Spine 2D', 'Animation'],
-    links: [{ label: 'More previews', url: 'http://bit.ly/3Vki87p' }],
+    description: 'Animated customer girls, chibi customers and a chibi motorbike-taxi driver in Spine 2D, freelancing for Niji Games. The game is released on Google Play.',
+    tags: ['Spine 2D', 'Animation', 'Google Play'],
+    previews: [
+      { title: 'Girl · Idle', drive: '1F7J0DUz9dUPM86-Q6kP5vyX0UL-Z2rxO' },
+      { title: 'Girl · Walking', drive: '1lAH6VEvX4Liz2LSjtwE5-_F-DVyAPkaN' },
+      { title: 'Chibi customer · Walk in', drive: '1sWLrzZx0YCpR4y9SQgR3tXjckmrsgD64' },
+      { title: 'Chibi customer · Order, normal', drive: '1d_mVyZ8bgAFRNHI7YwFhtOpkT_Z41_jU' },
+      { title: 'Chibi customer · Order, irritated', drive: '1BV462dNTCTASGxE-lBgdDFaDDyAA6FVZ' },
+      { title: 'Chibi customer · Order complete', drive: '19GTk2W35eYtyHED1hJ6N2_9u_cpUP4EH' },
+      { title: 'Chibi customer · Leave happy', drive: '11B7HBckAzGQKBmH4e0vys4ELAY4z2fQB' },
+      { title: 'Chibi customer · Leave angry', drive: '1skoUSG6b_Sgy32cbCFNMqXmLCSB8Ox0n' },
+      { title: 'Chibi customer · No service', drive: '1HzkBZJkdZJiH3rqq6Y8C8n3Ys7taE4cp' },
+      { title: 'Motorbike-taxi driver · Idle', drive: '1QkEQx2A3bIRi6Aw4IadHO-ClG50btktz' },
+      { title: 'Motorbike-taxi driver · Walk', drive: '10nLNS-u-XOA_YbYJZth3t_RFkKFnYZ8r' },
+    ],
+    links: [{ label: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.nijigames.chefstorys', primary: true }],
   },
   'virgo-sparkling': {
     id: 'virgo-sparkling',
-    title: 'Virgo and the Sparkling',
+    title: 'Virgo and the Sparklings',
     role: '2D Animator',
-    studio: 'Freelance',
+    studio: 'Niji Games (freelance)',
     blurb: 'Idle and talking animations in Spine 2D.',
     image: img('image76'),
-    imageAlt: 'Character from Virgo and the Sparkling',
+    imageAlt: 'Character from Virgo and the Sparklings',
     fit: 'contain',
     description: 'Idle and talking animations for the characters Sarip, Sasmi and Ren in Spine 2D.',
     tags: ['Spine 2D', 'Animation'],
-    links: [{ label: 'More previews', url: 'http://bit.ly/3PO57C2' }],
+    previews: [
+      { title: 'Sasmi · Idle', drive: '1iJOBPmbwwRcYBiBE09nK2MrmbUyUe3cy' },
+      { title: 'Sasmi · Talk', drive: '1RkwHuOQod07YLNcCgC9ytUG-LswLkf-y' },
+      { title: 'Sasmi, happy · Idle', drive: '1Mx8w3iC-57oB3MGHQ70tyu5wqC_pV3OO' },
+      { title: 'Sasmi, happy · Talk', drive: '1_vJAJg42-2cO3peruSH6RH97llxROMNf' },
+      { title: 'Sasmi, bashful · Idle', drive: '1l_Byx1G3SV2B80waMQ8k0G8N0vseyWAg' },
+      { title: 'Sasmi, bashful · Talk', drive: '1u2jy2UhlxsG-1gcBPTS8lzMzxosKAh3A' },
+      { title: 'Sasmi, surprised · Idle', drive: '1YXclVDo8GXuQUyuyyU9YJu3nxc-PrpHT' },
+      { title: 'Sasmi, surprised · Talk', drive: '1xcw2mN4wU4OY0h__Gqy4xM80C8hzz989' },
+      { title: 'Sasmi, recording · Idle', drive: '1E0WyeMnyE9FnF34HLo_QGufXfPxG-qp6' },
+      { title: 'Sasmi, recording · Talk', drive: '10AHcHV1tqGnV5JpoQoAZWobnSNigCx7A' },
+      { title: 'Ren · Idle', drive: '11yDHsE5h3VXBFw8dQ4ydBPr9V0lJqIHl' },
+      { title: 'Ren · Talk', drive: '1cLVGIXpkuBFc8RX98qgLvM3X-Kb1C0in' },
+      { title: 'Ren, serious · Idle', drive: '1EVhB9Gk_7GN3j0p_ceBHhJEaSWC5CoZw' },
+      { title: 'Ren, serious · Talk', drive: '1qxa7oN9Sjm_3i61lWpm4nu1Plv6S3tl6' },
+      { title: 'Ren, smug · Idle', drive: '1bIYO0a2C569qVDDcHwn5VLjPZUxcHq1y' },
+      { title: 'Ren, smug · Talk', drive: '1pKhHpnVLGBdQWQU7_EvXcBG5qUJwoeh5' },
+      { title: 'Butler · Idle', drive: '1HF23krwV0abt5F11YhHbfMneNagRO5Ak' },
+      { title: 'Butler · Talk', drive: '1joetiByaKrhYrrhd5ndBw000m6iwcvPm' },
+    ],
+    links: [{ label: 'QooApp', url: 'https://apps.qoo-app.com/en/app/19387', primary: true }],
   },
 
   distance: {

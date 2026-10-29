@@ -94,41 +94,25 @@ export function createPlayOverlay({ onOpen, onClose }) {
 export function createCardUI({ islands, quest, els, play }) {
   const { title, desc, content, scroll } = els;
   let current = null;
-  let detailId = null;
-  let media = null; // element holding an iframe/video, removed on leave
+  let medias = []; // elements holding an iframe/video, removed on leave
 
   const nameOf = (id) => islands.find((i) => i.id === id)?.name ?? id;
 
   function dropMedia() {
-    if (!media) return;
-    const v = media.querySelector('video');
-    if (v) {
-      v.pause();
-      v.removeAttribute('src');
-      v.load();
+    for (const media of medias) {
+      const v = media.querySelector('video');
+      if (v) {
+        v.pause();
+        v.removeAttribute('src');
+        v.load();
+      }
+      media.remove(); // removing iframe stops playback
     }
-    media.remove(); // removing iframe stops playback
-    media = null;
+    medias = [];
   }
 
   function creditLine(p) {
     return [p.role, p.studio, p.period].filter(Boolean).join(' · ');
-  }
-
-  function tile(p) {
-    return h(
-      'button',
-      { type: 'button', class: 'tile', onclick: () => showDetail(p.id) },
-      h('img', { src: p.image, alt: p.imageAlt, loading: 'lazy', class: p.fit === 'contain' ? 'contain' : null }),
-      h(
-        'span',
-        { class: 'tile-text' },
-        h('b', { text: p.title }),
-        h('small', { text: creditLine(p) }),
-        h('span', { text: p.blurb })
-      ),
-      h('span', { class: 'tile-go', 'aria-hidden': 'true', text: '›' })
-    );
   }
 
   function archiveList(ids) {
@@ -236,9 +220,9 @@ export function createCardUI({ islands, quest, els, play }) {
     );
   }
 
+  // island card: every project fully expanded, one after another (no list -> detail step), archive last
   function renderList() {
     dropMedia();
-    detailId = null;
     content.replaceChildren();
     const isl = current;
     title.textContent = isl.name;
@@ -246,9 +230,19 @@ export function createCardUI({ islands, quest, els, play }) {
     if (isl.section === 'profile') content.append(profileBlock());
     else if (isl.section === 'contact') content.append(contactBlock());
     else if (isl.section && sections[isl.section]) content.append(facts(sections[isl.section].facts));
-    if (isl.projects?.length) {
-      content.append(h('h4', { class: 'sect', text: 'Projects' }), h('div', { class: 'tiles' }, isl.projects.map((id) => tile(projects[id]))));
+    const list = (isl.projects ?? []).map((id) => projects[id]);
+    if (list.length) content.append(h('h4', { class: 'sect', text: list.length > 1 ? `Projects (${list.length})` : 'Project' }));
+    // jump chips: scroll the card to one project
+    if (list.length > 1) {
+      content.append(
+        h(
+          'nav',
+          { class: 'jump', 'aria-label': 'Jump to project' },
+          list.map((p) => h('button', { type: 'button', text: p.title, onclick: () => content.querySelector(`#p-${p.id}`).scrollIntoView({ behavior: 'smooth', block: 'start' }) }))
+        )
+      );
     }
+    content.append(...list.map(projectSection));
     if (isl.archive?.length) content.append(h('h4', { class: 'sect', text: 'More projects' }), archiveList(isl.archive));
     scroll.scrollTop = 0;
   }
@@ -267,26 +261,43 @@ export function createCardUI({ islands, quest, els, play }) {
     });
   }
 
-  function showDetail(id) {
-    const p = projects[id];
-    dropMedia();
-    detailId = id;
-    content.replaceChildren();
-    const kids = [h('button', { type: 'button', class: 'back', onclick: renderList, text: '← Back' })];
+  // Drive GIF previews, one at a time: ‹ › step through the list; only the shown GIF is loaded (they are large)
+  function previewPanel(list, titleText) {
+    let i = 0;
+    const frame = h('iframe', { allow: 'autoplay', loading: 'lazy' });
+    const cap = h('span', { class: 'pv-cap', 'aria-live': 'polite' });
+    const show = (k) => {
+      i = (k + list.length) % list.length;
+      frame.src = `https://drive.google.com/file/d/${list[i].drive}/preview`;
+      frame.title = `${titleText} animation: ${list[i].title}`;
+      cap.textContent = `${list[i].title} · ${i + 1} / ${list.length}`;
+    };
+    const nav = (dir, label, text) => h('button', { type: 'button', class: 'pv-nav', 'aria-label': label, onclick: () => show(i + dir), text });
+    show(0);
+    return h('div', { class: 'media preview' }, frame, h('div', { class: 'pv-bar' }, nav(-1, 'Previous animation', '‹'), cap, nav(1, 'Next animation', '›')));
+  }
 
+  // one project, expanded: image or gallery, credit, description, stats, duties, tags, video, links
+  function projectSection(p) {
+    const kids = [];
     if (p.gallery?.length) {
       kids.push(
         h(
           'div',
           { class: 'title-row' },
-          h('img', { src: p.image, alt: p.imageAlt }),
+          h('img', { src: p.image, alt: p.imageAlt, loading: 'lazy' }),
           h('div', null, h('h3', { text: p.title }), h('p', { class: 'credit', text: creditLine(p) }))
         ),
         h('div', { class: 'gallery', tabindex: '0', 'aria-label': `${p.title} screenshots` }, p.gallery.map((g) => h('img', { src: g.src, alt: g.alt, loading: 'lazy' }))),
         h('p', { class: 'gallery-hint', text: 'Swipe or scroll for more screenshots' })
       );
+    } else if (p.previews?.length) {
+      // animation previews take the hero image's place
+      const media = previewPanel(p.previews, p.title);
+      medias.push(media);
+      kids.push(media, h('h3', { text: p.title }), h('p', { class: 'credit', text: creditLine(p) }));
     } else {
-      kids.push(h('img', { class: p.fit === 'contain' ? 'hero contain' : 'hero', src: p.image, alt: p.imageAlt }), h('h3', { text: p.title }), h('p', { class: 'credit', text: creditLine(p) }));
+      kids.push(h('img', { class: p.fit === 'contain' ? 'hero contain' : 'hero', src: p.image, alt: p.imageAlt, loading: 'lazy' }), h('h3', { text: p.title }), h('p', { class: 'credit', text: creditLine(p) }));
     }
 
     kids.push(h('p', { text: p.description }));
@@ -295,7 +306,8 @@ export function createCardUI({ islands, quest, els, play }) {
     if (p.tags?.length) kids.push(h('div', { class: 'chips' }, p.tags.map((t) => h('span', { text: t }))));
 
     if (p.video) {
-      media = h('div', { class: p.video.type === 'instagram' ? 'media media-ig' : 'media' }, videoEl(p.video, p.title));
+      const media = h('div', { class: p.video.type === 'instagram' ? 'media media-ig' : 'media' }, videoEl(p.video, p.title));
+      medias.push(media);
       kids.push(media);
     }
     const links = h('div', { class: 'links' });
@@ -303,8 +315,7 @@ export function createCardUI({ islands, quest, els, play }) {
     for (const l of p.links ?? []) links.append(extLink(l, l.primary && !p.play ? 'btn primary' : 'btn'));
     if (links.children.length) kids.push(links);
 
-    content.append(...kids);
-    scroll.scrollTop = 0;
+    return h('section', { class: 'project', id: `p-${p.id}` }, kids);
   }
 
   return {
@@ -312,26 +323,16 @@ export function createCardUI({ islands, quest, els, play }) {
       current = isl;
       renderList();
     },
-    // true if a layer (play overlay, detail view) consumed the Escape / back action
+    // true if the play overlay consumed the Escape / back action
     back() {
-      if (play.isOpen()) {
-        play.close();
-        return true;
-      }
-      if (detailId) {
-        renderList();
-        return true;
-      }
-      return false;
+      if (!play.isOpen()) return false;
+      play.close();
+      return true;
     },
     // card closing: stop media and any game
     reset() {
       play.close();
       dropMedia();
-      detailId = null;
-    },
-    refreshIfOpen() {
-      if (current && !detailId) renderList();
     },
     nameOf,
   };
