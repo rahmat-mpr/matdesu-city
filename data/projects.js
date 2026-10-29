@@ -9,7 +9,7 @@ export const profile = {
   name: 'Rahmat Maulana Putra Rianto',
   headline: 'Unity Game Programmer & PIC QA',
   location: 'Surabaya, Indonesia',
-  portrait: 'assets/img/image10.jpg',
+  portrait: 'assets/img/portrait.jpg',
   portraitAlt: 'Portrait of Rahmat Maulana',
   intro:
     'Game programmer with 6+ years shipping Unity titles across mobile, WebGL, Steam, AR/VR and interactive installations. Currently at Yes2Games in Singapore (remote), where I write gameplay code and run QA for released games.',
