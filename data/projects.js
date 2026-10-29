@@ -143,6 +143,32 @@ export const projects = {
     links: [],
   },
 
+  'product-display': {
+    id: 'product-display',
+    title: 'Product Display',
+    role: 'Programmer',
+    studio: 'DFactory Visual',
+    blurb: 'Interactive 3D product viewer for a portrait touchscreen kiosk.',
+    description:
+      'Interactive 3D product showcase for a portrait touchscreen kiosk, demoed with a La Roche-Posay serum. Shoppers rotate and inspect the bottle in real time, switch its color, open the cap to reveal the dropper, or let Auto mode spin the product as an attract loop between visitors.',
+    tags: ['3D viewer', 'Touchscreen', 'Retail'],
+    previews: [{ title: 'Product Display demo', drive: '1T3pnvsFD44aWfBhbAyiBnBL5Ioo0JUDe' }],
+    links: [],
+  },
+
+  'led-visual-animation': {
+    id: 'led-visual-animation',
+    title: 'LED Visual Animation',
+    role: 'Programmer',
+    studio: 'DFactory Visual',
+    blurb: 'Real-time animated visuals for large LED screens.',
+    description:
+      'Animated visual content built in Unity for large LED screens at events and stage shows. Runs in real time at the LED wall resolution, so scenes can loop, switch and sync with the show instead of playing as fixed video files.',
+    tags: ['LED installation', 'Motion graphics'],
+    previews: [{ title: 'LED Visual Animation', drive: '1Z6Opjhupzu0LV2q8jYMaJ80j7t6KI8_p' }],
+    links: [],
+  },
+
   'magica-planta-botanica': {
     id: 'magica-planta-botanica',
     title: 'Magica Planta Botanica',

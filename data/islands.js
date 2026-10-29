@@ -167,7 +167,7 @@ export const islands = [
     biome: 'neon',
     theme: { emoji: '\u{1F6CD}️' },
     hotspot: [0, 5.5, -1],
-    projects: ['disney-piano', 'adelle-score-board'],
+    projects: ['disney-piano', 'adelle-score-board', 'product-display', 'led-visual-animation'],
     models: [
       { m: 'commercial/building-f', x: -3.0, z: -3.0 },
       { m: 'commercial/building-a', x: -1.0, z: -3.0 },
