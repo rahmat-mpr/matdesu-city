@@ -441,15 +441,17 @@ const tutorial = $('tutorial');
 // pointing hand: glides to an element (fingertip on its centre), optionally taps it
 const finger = $('finger');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function pointAt(el, tap = false) {
+// instant: appear on the target (pointing in place) instead of gliding there
+async function pointAt(el, tap = false, instant = false) {
   const r = el.getBoundingClientRect();
+  finger.classList.toggle('instant', instant);
   if (finger.hidden) {
     finger.hidden = false;
     finger.getBoundingClientRect(); // so the glide starts from where the hand was
   }
   finger.classList.remove('tap');
   finger.style.transform = `translate(${r.left + r.width / 2}px, ${r.top + r.height / 2}px)`;
-  await sleep(1600); // glide (1.4s in CSS) plus a short rest
+  await sleep(instant ? 1800 : 1600); // pointing in place, or glide (1.4s in CSS) plus a short rest
   if (tap) {
     finger.classList.add('tap');
     await sleep(900);
@@ -462,8 +464,7 @@ async function runTutorial() {
   tutorial.hidden = false;
   hs.el.classList.add('pulse');
   await waitUntil(() => !fly); // intro fly-in may still be running
-  await sleep(1800); // let the visitor read the bubble first
-  await pointAt(hs.el.querySelector('.icon'), true);
+  await pointAt(hs.el.querySelector('.icon'), true, true); // points at the icon while the visitor reads the bubble
   if (!selected) openIsland(town, { visit: false }); // the quest is ticked when the visitor closes this card
   finger.hidden = true;
   await waitUntil(() => card.classList.contains('open'));

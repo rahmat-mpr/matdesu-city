@@ -156,6 +156,7 @@
 /* tutorial pointing hand: the element sits on the target point, the emoji's fingertip on that point */
 #finger { position: fixed; z-index: 26; left: 0; top: 0; transform: translate(50vw, 80vh); transition: transform 1.4s ease-in-out; pointer-events: none; }
 #finger[hidden] { display: none; }
+#finger.instant { transition: none; }
 #finger span { display: block; margin: -4px 0 0 -14px; font-size: 40px; line-height: 1; filter: drop-shadow(0 3px 3px rgba(23,50,77,.4)); animation: finger-bob 1s ease-in-out infinite; }
 #finger.tap span { animation: finger-tap .45s ease-in-out 2; }
 @keyframes finger-bob { 0%, 100% { translate: 0 8px; } 50% { translate: 0 0; } }
