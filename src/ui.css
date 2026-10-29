@@ -76,6 +76,7 @@
 .timeline .when { flex: none; width: 112px; color: #3d5a75; font-weight: 700; }
 .timeline b, .timeline small { display: block; }
 .timeline small { font-size: 14px; }
+@media (min-width: 700px) { .timeline .when { width: 150px; white-space: nowrap; } } /* room for 'Oct 2023 – Jan 2025' on one line */
 
 
 .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
